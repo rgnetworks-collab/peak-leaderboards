@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PEAK Leaderboards</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8f9fa; color: #333; }
+    
+    header { background: white; padding: 20px; border-bottom: 1px solid #ddd; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .header-content { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    h1 { font-size: 28px; color: #0066cc; }
+    nav { display: flex; gap: 20px; }
+    nav button { background: none; border: none; color: #0066cc; cursor: pointer; font-size: 14px; font-weight: bold; padding: 8px 12px; border-radius: 4px; }
+    nav button:hover { background: #f0f0f0; }
+    nav button.active { background: #0066cc; color: white; }
+    
+    .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+    
+    .section { display: none; }
+    .section.active { display: block; }
+    
+    h2 { font-size: 24px; margin: 30px 0 20px 0; }
+    
+    form { background: white; padding: 20px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+    input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+    input:focus, select:focus { outline: none; border-color: #0066cc; box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1); }
+    button[type="submit"] { background: #0066cc; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 14px; }
+    button[type="submit"]:hover { background: #0052a3; }
+    
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    th { background: #f0f0f0; padding: 12px; text-align: left; font-weight: bold; border-bottom: 2px solid #ddd; }
+    td { padding: 12px; border-bottom: 1px solid #ddd; }
+    tr:hover { background: #f9f9f9; }
+    
+    .btn-delete { background: #ff4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+    .btn-delete:hover { background: #cc0000; }
+    
+    .filter-container { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    
+    .empty-msg { text-align: center; padding: 40px; color: #999; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <h1>PEAK Leaderboards</h1>
+      <nav>
+        <button class="nav-btn active" data-section="dashboard">Dashboard</button>
+        <button class="nav-btn" data-section="athletes">Athletes</button>
+        <button class="nav-btn" data-section="admin">Record Assessment</button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="section active">
+      <div class="filter-container">
+        <div>
+          <label>Assessment</label>
+          <select id="metricSelect">
+            <option value="">Loading...</option>
+          </select>
+        </div>
+        <div>
+          <label>Program</label>
+          <select id="programSelect">
+            <option value="">All Programs</option>
+            <option value="Elementary School (Grades 1-5)">Elementary School (Grades 1-5)</option>
+            <option value="Middle School (Grades 6-8)">Middle School (Grades 6-8)</option>
+            <option value="High School (Grades 9-12)">High School (Grades 9-12)</option>
+            <option value="College">College</option>
+            <option value="Adult">Adult</option>
+          </select>
+        </div>
+      </div>
+
+      <table id="leaderboardTable">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Athlete</th>
+            <th>Program</th>
+            <th style="text-align: right;">Score</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboardBody">
+          <tr><td colspan="4" class="empty-msg">Loading leaderboard...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ATHLETES -->
+    <div id="athletes" class="section">
+      <form id="addAthleteForm">
+        <h2>Add New Athlete</h2>
+        <div class="form-group">
+          <label>Athlete Name *</label>
+          <input type="text" id="athleteName" placeholder="Enter athlete name" required>
+        </div>
+        <div class="form-group">
+          <label>Program *</label>
+          <select id="athleteProgram" required>
+            <option>Elementary School (Grades 1-5)</option>
+            <option>Middle School (Grades 6-8)</option>
+            <option>High School (Grades 9-12)</option>
+            <option>College</option>
+            <option>Adult</option>
+          </select>
+        </div>
+        <button type="submit">Add Athlete</button>
+      </form>
+
+      <h2>Athletes</h2>
+      <table id="athletesTable">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Program</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="athletesBody">
+          <tr><td colspan="3" class="empty-msg">No athletes yet. Add one above!</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ADMIN -->
+    <div id="admin" class="section">
+      <form id="addAssessmentForm">
+        <h2>Record Assessment</h2>
+        <div class="form-group">
+          <label>Athlete *</label>
+          <select id="assessmentAthlete" required>
+            <option value="">Select an athlete</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Assessment Metric *</label>
+          <select id="assessmentMetric" required>
+            <option value="">Select a metric</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Value *</label>
+          <input type="number" id="assessmentValue" placeholder="e.g., 42" step="0.1" required>
+        </div>
+        <button type="submit">Record Assessment</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ===== STATE & STORAGE =====
+    const LS_KEY = 'peak_leaderboard_app';
+    let state = {
+      athletes: [],
+      assessments: [],
+      metrics: [
+        { id: '1', name: 'hand_grip', display: 'Hand Grip Test', unit: 'kg' },
+        { id: '2', name: 'bar_hang_time', display: 'Bar Hang', unit: 'sec' },
+        { id: '3', name: 'pullups_60', display: 'Pull-Ups (60 sec)', unit: 'reps' },
+        { id: '4', name: 'pushups_60', display: 'Push-Ups (60 sec)', unit: 'reps' },
+        { id: '5', name: 'trapbar_deadlift_1rm', display: 'Trap Bar Deadlift 1RM', unit: 'lbs' },
+        { id: '6', name: 'plank_time', display: 'Plank Time', unit: 'sec' },
+        { id: '7', name: 'bike_rpm', display: 'Bike RPM', unit: 'rpm' },
+        { id: '8', name: 'squat_1rm', display: 'Squat 1RM', unit: 'lbs' },
+        { id: '9', name: 'bench_1rm', display: 'Bench Press 1RM', unit: 'lbs' },
+        { id: '10', name: 'vertical_jump', display: 'Vertical Jump', unit: 'inches' },
+        { id: '11', name: 'row_500m', display: 'Row 500M', unit: 'sec' }
+      ]
+    };
+
+    // ===== LOAD/SAVE =====
+    function load() {
+      const raw = localStorage.getItem(LS_KEY);
+      if (raw) {
+        try {
+          const saved = JSON.parse(raw);
+          state.athletes = saved.athletes || [];
+          state.assessments = saved.assessments || [];
+        } catch (e) {
+          console.error('Load error:', e);
+        }
+      }
+      render();
+    }
+
+    function save() {
+      localStorage.setItem(LS_KEY, JSON.stringify(state));
+    }
+
+    // ===== ADD ATHLETE =====
+    document.getElementById('addAthleteForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('athleteName').value.trim();
+      const program = document.getElementById('athleteProgram').value;
+
+      if (!name) {
+        alert('Please enter a name');
+        return;
+      }
+
+      state.athletes.push({
+        id: Date.now().toString(),
+        name,
+        program
+      });
+
+      save();
+      document.getElementById('addAthleteForm').reset();
+      alert('Athlete added!');
+      render();
+    });
+
+    // ===== DELETE ATHLETE =====
+    function deleteAthlete(id) {
+      if (!confirm('Delete this athlete?')) return;
+      state.athletes = state.athletes.filter(a => a.id !== id);
+      save();
+      alert('Athlete deleted!');
+      render();
+    }
+
+    // ===== ADD ASSESSMENT =====
+    document.getElementById('addAssessmentForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const athleteId = document.getElementById('assessmentAthlete').value;
+      const metricId = document.getElementById('assessmentMetric').value;
+      const value = parseFloat(document.getElementById('assessmentValue').value);
+
+      if (!athleteId || !metricId || isNaN(value)) {
+        alert('Please fill in all fields');
+        return;
+      }
+
+      state.assessments.push({
+        id: Date.now().toString(),
+        athleteId,
+        metricId,
+        value,
+        date: new Date().toISOString()
+      });
+
+      save();
+      document.getElementById('addAssessmentForm').reset();
+      alert('Assessment recorded!');
+      render();
+    });
+
+    // ===== RENDER ATHLETES =====
+    function renderAthletes() {
+      const tbody = document.getElementById('athletesBody');
+      if (state.athletes.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" class="empty-msg">No athletes yet. Add one above!</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = state.athletes.map(a => `
+        <tr>
+          <td>${a.name}</td>
+          <td>${a.program}</td>
+          <td><button class="btn-delete" onclick="deleteAthlete('${a.id}')">Delete</button></td>
+        </tr>
+      `).join('');
+    }
+
+    // ===== RENDER LEADERBOARD =====
+    function renderLeaderboard() {
+      const metricId = document.getElementById('metricSelect').value;
+      const program = document.getElementById('programSelect').value;
+
+      if (!metricId) {
+        document.getElementById('leaderboardBody').innerHTML = '<tr><td colspan="4" class="empty-msg">No metric selected</td></tr>';
+        return;
+      }
+
+      const metric = state.metrics.find(m => m.id === metricId);
+      if (!metric) return;
+
+      // Get assessments for this metric
+      const relevantAssessments = state.assessments.filter(a => a.metricId === metricId);
+
+      // Group by athlete and get latest score
+      const athleteScores = {};
+      relevantAssessments.forEach(a => {
+        if (!athleteScores[a.athleteId] || new Date(a.date) > new Date(athleteScores[a.athleteId].date)) {
+          athleteScores[a.athleteId] = a;
+        }
+      });
+
+      // Rank
+      let ranked = Object.values(athleteScores).map(a => ({
+        score: a.value,
+        athlete: state.athletes.find(ath => ath.id === a.athleteId)
+      })).filter(r => r.athlete);
+
+      if (program) {
+        ranked = ranked.filter(r => r.athlete.program === program);
+      }
+
+      ranked.sort((a, b) => b.score - a.score);
+
+      const tbody = document.getElementById('leaderboardBody');
+      if (ranked.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty-msg">No data for this metric</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = ranked.map((r, i) => `
+        <tr>
+          <td><strong>#${i + 1}</strong></td>
+          <td>${r.athlete.name}</td>
+          <td>${r.athlete.program}</td>
+          <td style="text-align: right; font-weight: bold;">${r.score}</td>
+        </tr>
+      `).join('');
+    }
+
+    // ===== RENDER DROPDOWNS =====
+    function renderDropdowns() {
+      // Metrics
+      const metricSelect = document.getElementById('metricSelect');
+      const assessmentMetric = document.getElementById('assessmentMetric');
+      const metricsHtml = state.metrics.map(m => `<option value="${m.id}">${m.display}</option>`).join('');
+      metricSelect.innerHTML = metricsHtml;
+      assessmentMetric.innerHTML = '<option value="">Select a metric</option>' + metricsHtml;
+
+      // Athletes
+      const athleteSelect = document.getElementById('assessmentAthlete');
+      const athletesHtml = state.athletes.map(a => `<option value="${a.id}">${a.name} (${a.program})</option>`).join('');
+      athleteSelect.innerHTML = '<option value="">Select an athlete</option>' + athletesHtml;
+
+      // Set default metric
+      if (metricSelect.value === '') {
+        metricSelect.value = state.metrics[0]?.id || '';
+      }
+    }
+
+    // ===== RENDER ALL =====
+    function render() {
+      renderDropdowns();
+      renderAthletes();
+      renderLeaderboard();
+    }
+
+    // ===== NAV =====
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const section = btn.dataset.section;
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(section).classList.add('active');
+        btn.classList.add('active');
+      });
+    });
+
+    // ===== EVENTS =====
+    document.getElementById('metricSelect').addEventListener('change', renderLeaderboard);
+    document.getElementById('programSelect').addEventListener('change', renderLeaderboard);
+
+    // ===== INIT =====
+    load();
+  </script>
+</body>
+</html>
