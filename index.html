@@ -8,18 +8,18 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; }
     .hidden { display: none !important; }
-    header { background: white; padding: 20px; border-bottom: 1px solid #ddd; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    header { background: white; padding: 20px; border-bottom: 1px solid #ddd; }
     .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
     h1 { color: #0066cc; font-size: 28px; }
     .header-flex { display: flex; justify-content: space-between; align-items: center; }
-    .user-info { display: flex; align-items: center; gap: 15px; font-size: 14px; }
+    .user-info { display: flex; align-items: center; gap: 15px; }
     .login-container { max-width: 400px; margin: 60px auto; padding: 40px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
     .login-container h1 { text-align: center; margin-bottom: 30px; }
     .form-group { margin: 15px 0; }
-    label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+    label { display: block; font-weight: bold; margin-bottom: 5px; }
     input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
-    input:focus, select:focus { outline: none; border-color: #0066cc; box-shadow: 0 0 0 3px rgba(0,102,204,0.1); }
-    button { padding: 10px 20px; background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; }
+    input:focus, select:focus { outline: none; border-color: #0066cc; }
+    button { padding: 10px 20px; background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
     button:hover { background: #0052a3; }
     button.danger { background: #ff4444; }
     button.secondary { background: #666; }
@@ -33,24 +33,18 @@
     h2 { margin: 30px 0 20px 0; font-size: 24px; }
     table { width: 100%; border-collapse: collapse; background: white; margin: 20px 0; border-radius: 8px; }
     th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-    th { background: #f0f0f0; font-weight: bold; }
-    .filter-box { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    th { background: #f0f0f0; }
     .form-box { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-    .stats { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
-    .stat-value { font-size: 24px; font-weight: bold; color: #0066cc; }
-    .stat-label { font-size: 12px; color: #666; }
     .logo-header { display: flex; align-items: center; gap: 15px; }
     .logo-header img { height: 40px; width: 40px; border-radius: 50%; }
     @media (max-width: 480px) {
       button { padding: 12px 12px; font-size: 16px; min-height: 44px; }
       input, select { padding: 12px; font-size: 16px; min-height: 44px; }
-      .filter-box { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-  <!-- LOGIN SCREEN -->
+  <!-- LOGIN -->
   <div id="loginScreen">
     <div class="login-container">
       <img src="logo.png" alt="PEAK" style="height: 80px; width: 80px; border-radius: 50%; margin: 0 auto 20px; display: block;">
@@ -73,29 +67,7 @@
         </div>
         <button onclick="window.app.login()" style="width: 100%;">Sign In</button>
         <div id="loginError" class="error" style="text-align: center; margin-top: 10px;"></div>
-        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center;">
-          <p style="font-size: 12px; color: #666; margin-bottom: 10px;">First time?</p>
-          <button onclick="window.app.showSignup()" class="secondary" style="width: 100%;">Create Account</button>
-        </div>
-      </div>
-
-      <div id="signupForm" class="hidden">
-        <p style="text-align: center; margin-bottom: 20px; color: #666;">Create a new coach account</p>
-        <div class="form-group">
-          <label>Coach Name</label>
-          <input type="text" id="signupName" placeholder="Your name">
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="signupPassword" placeholder="Password (min 6 chars)">
-        </div>
-        <div class="form-group">
-          <label>Confirm Password</label>
-          <input type="password" id="signupPassword2" placeholder="Confirm password">
-        </div>
-        <button onclick="window.app.signup()" style="width: 100%;">Create Account</button>
-        <button onclick="window.app.showCoachLogin()" class="secondary" style="width: 100%; margin-top: 10px;">Back</button>
-        <div id="signupError" class="error" style="text-align: center; margin-top: 10px;"></div>
+        <p style="text-align: center; margin-top: 20px; font-size: 12px; color: #999;">Demo: Coach / coach123</p>
       </div>
 
       <div id="athleteLoginForm" class="hidden">
@@ -105,7 +77,7 @@
         </div>
         <div class="form-group">
           <label>Access Code</label>
-          <input type="text" id="athleteCode" placeholder="Access code (ask your coach)">
+          <input type="text" id="athleteCode" placeholder="Access code">
         </div>
         <button onclick="window.app.athleteLogin()" style="width: 100%;">View Leaderboard</button>
         <div id="athleteLoginError" class="error" style="text-align: center; margin-top: 10px;"></div>
@@ -138,7 +110,8 @@
       
       <div id="dashboard" class="section active">
         <h2>Dashboard</h2>
-        <p>Welcome, <span id="coachName"></span>!</p>
+        <p>Welcome, <span id="coachName" style="font-weight: bold;"></span>!</p>
+        <p style="margin-top: 20px;">Use the tabs above to manage athletes and coaches.</p>
       </div>
 
       <div id="athletes" class="section">
@@ -163,7 +136,7 @@
           <div id="athleteMsg"></div>
         </div>
         <table>
-          <thead><tr><th>Name</th><th>Program</th><th>Code</th><th>Action</th></tr></thead>
+          <thead><tr><th>Name</th><th>Program</th><th>Access Code</th><th>Action</th></tr></thead>
           <tbody id="athletesBody"><tr><td colspan="4" style="text-align: center; padding: 40px; color: #999;">No athletes yet</td></tr></tbody>
         </table>
       </div>
@@ -209,7 +182,7 @@
     </header>
     <div class="container">
       <h2>Leaderboards</h2>
-      <p>Athlete view (read-only)</p>
+      <p>Read-only view for athletes</p>
     </div>
   </div>
 
@@ -222,6 +195,7 @@
       currentAthlete: null,
 
       init() {
+        this.setupInitialCoach();
         const coach = localStorage.getItem('peakCurrentCoach');
         const athlete = localStorage.getItem('peakCurrentAthlete');
         
@@ -236,6 +210,25 @@
         }
       },
 
+      async setupInitialCoach() {
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/coaches?name=eq.Coach`, {
+            headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY }
+          });
+          const coaches = await res.json();
+          
+          if (coaches.length === 0) {
+            await fetch(`${SUPABASE_URL}/rest/v1/coaches`, {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: 'Coach', password: 'coach123' })
+            });
+          }
+        } catch (e) {
+          console.error('Setup error:', e);
+        }
+      },
+
       showLogin() {
         document.getElementById('loginScreen').classList.remove('hidden');
         document.getElementById('appScreen').classList.add('hidden');
@@ -245,18 +238,11 @@
 
       showCoachLogin() {
         document.getElementById('coachLoginForm').classList.remove('hidden');
-        document.getElementById('signupForm').classList.add('hidden');
         document.getElementById('athleteLoginForm').classList.add('hidden');
-      },
-
-      showSignup() {
-        document.getElementById('coachLoginForm').classList.add('hidden');
-        document.getElementById('signupForm').classList.remove('hidden');
       },
 
       showAthleteLogin() {
         document.getElementById('coachLoginForm').classList.add('hidden');
-        document.getElementById('signupForm').classList.add('hidden');
         document.getElementById('athleteLoginForm').classList.remove('hidden');
       },
 
@@ -280,34 +266,6 @@
 
           localStorage.setItem('peakCurrentCoach', name);
           localStorage.removeItem('peakCurrentAthlete');
-          this.currentCoach = name;
-          this.showApp();
-        } catch (e) {
-          err.textContent = 'Error: ' + e.message;
-        }
-      },
-
-      async signup() {
-        const name = document.getElementById('signupName').value.trim();
-        const pass1 = document.getElementById('signupPassword').value;
-        const pass2 = document.getElementById('signupPassword2').value;
-        const err = document.getElementById('signupError');
-
-        if (!name || pass1.length < 6 || pass1 !== pass2) {
-          err.textContent = 'Invalid input';
-          return;
-        }
-
-        try {
-          const res = await fetch(`${SUPABASE_URL}/rest/v1/coaches`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, password: pass1 })
-          });
-
-          if (!res.ok) throw new Error('Name taken');
-
-          localStorage.setItem('peakCurrentCoach', name);
           this.currentCoach = name;
           this.showApp();
         } catch (e) {
@@ -387,7 +345,7 @@
             </tr>
           `).join('') || '<tr><td colspan="2" style="text-align: center; color: #999;">No coaches</td></tr>';
         } catch (e) {
-          console.error('Error loading coaches:', e);
+          console.error('Error:', e);
         }
       },
 
@@ -407,7 +365,7 @@
             </tr>
           `).join('') || '<tr><td colspan="4" style="text-align: center; color: #999;">No athletes</td></tr>';
         } catch (e) {
-          console.error('Error loading athletes:', e);
+          console.error('Error:', e);
         }
       },
 
@@ -432,7 +390,7 @@
             msg.innerHTML = `<span class="success">Added! Code: <strong>${code}</strong></span>`;
             this.loadAthletes();
           } else {
-            msg.innerHTML = '<span class="error">Error adding athlete</span>';
+            msg.innerHTML = '<span class="error">Error</span>';
           }
         } catch (e) {
           msg.innerHTML = '<span class="error">Error: ' + e.message + '</span>';
@@ -444,7 +402,7 @@
         const pass = document.getElementById('newCoachPass').value;
         const msg = document.getElementById('coachMsg');
 
-        if (!name || pass.length < 6) { msg.innerHTML = '<span class="error">Invalid input</span>'; return; }
+        if (!name || pass.length < 6) { msg.innerHTML = '<span class="error">Invalid</span>'; return; }
 
         try {
           const res = await fetch(`${SUPABASE_URL}/rest/v1/coaches`, {
@@ -459,7 +417,7 @@
             msg.innerHTML = '<span class="success">Coach added!</span>';
             this.loadCoaches();
           } else {
-            msg.innerHTML = '<span class="error">Coach already exists</span>';
+            msg.innerHTML = '<span class="error">Name taken</span>';
           }
         } catch (e) {
           msg.innerHTML = '<span class="error">Error: ' + e.message + '</span>';
@@ -467,7 +425,7 @@
       },
 
       async deleteAthlete(id) {
-        if (!confirm('Delete this athlete?')) return;
+        if (!confirm('Delete?')) return;
         try {
           await fetch(`${SUPABASE_URL}/rest/v1/athletes?id=eq.${id}`, {
             method: 'DELETE',
@@ -480,7 +438,7 @@
       },
 
       async deleteCoach(id) {
-        if (!confirm('Delete this coach?')) return;
+        if (!confirm('Delete?')) return;
         try {
           await fetch(`${SUPABASE_URL}/rest/v1/coaches?id=eq.${id}`, {
             method: 'DELETE',
@@ -493,7 +451,6 @@
       }
     };
 
-    // Initialize when DOM is ready
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => window.app.init());
     } else {
