@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PEAK Leaderboards</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #333; }
@@ -39,8 +38,8 @@
     <div class="auth-box">
       <h1 style="text-align: center; margin-bottom: 30px;">PEAK</h1>
       <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-        <button id="loginTabBtn" onclick="window.app.showLoginTab()" style="flex: 1; background: #0066cc;">Login</button>
-        <button id="signupTabBtn" onclick="window.app.showSignupTab()" style="flex: 1; background: #ccc; color: #333;">Sign Up</button>
+        <button id="loginTabBtn" onclick="app.showLoginTab()" style="flex: 1; background: #0066cc;">Login</button>
+        <button id="signupTabBtn" onclick="app.showSignupTab()" style="flex: 1; background: #ccc; color: #333;">Sign Up</button>
       </div>
 
       <div id="loginForm">
@@ -52,7 +51,7 @@
           <label>Password</label>
           <input type="password" id="loginPassword" placeholder="Password">
         </div>
-        <button onclick="window.app.handleLogin()" style="width: 100%;">Sign In</button>
+        <button onclick="app.handleLogin()" style="width: 100%;">Sign In</button>
         <div id="loginError" class="error"></div>
       </div>
 
@@ -65,11 +64,7 @@
           <label>Password</label>
           <input type="password" id="signupPassword" placeholder="Password (min 6 chars)">
         </div>
-        <div class="form-group">
-          <label>Name</label>
-          <input type="text" id="signupName" placeholder="Your name">
-        </div>
-        <button onclick="window.app.handleSignup()" style="width: 100%;">Create Account</button>
+        <button onclick="app.handleSignup()" style="width: 100%;">Create Account</button>
         <div id="signupError" class="error"></div>
       </div>
     </div>
@@ -83,7 +78,7 @@
           <h1>PEAK Leaderboards</h1>
           <div>
             <span id="userEmail" style="margin-right: 20px;"></span>
-            <button onclick="window.app.handleLogout()" style="width: auto;">Logout</button>
+            <button onclick="app.handleLogout()" style="width: auto;">Logout</button>
           </div>
         </div>
       </div>
@@ -91,9 +86,9 @@
 
     <div class="container">
       <nav>
-        <button class="nav-btn active" onclick="window.app.switchSection('dashboard', this)">Dashboard</button>
-        <button class="nav-btn" onclick="window.app.switchSection('athletes', this)">Athletes</button>
-        <button class="nav-btn" onclick="window.app.switchSection('assessments', this)">Record Assessment</button>
+        <button class="nav-btn active" onclick="app.switchSection('dashboard', this)">Dashboard</button>
+        <button class="nav-btn" onclick="app.switchSection('athletes', this)">Athletes</button>
+        <button class="nav-btn" onclick="app.switchSection('assessments', this)">Record Assessment</button>
       </nav>
 
       <div id="dashboard" class="section active">
@@ -101,13 +96,13 @@
         <div class="filter-box">
           <div>
             <label>Assessment</label>
-            <select id="metricSelect" onchange="window.app.renderLeaderboard()">
+            <select id="metricSelect" onchange="app.renderLeaderboard()">
               <option value="">Loading...</option>
             </select>
           </div>
           <div>
             <label>Program</label>
-            <select id="programSelect" onchange="window.app.renderLeaderboard()">
+            <select id="programSelect" onchange="app.renderLeaderboard()">
               <option value="">All Programs</option>
               <option value="Elementary School (Grades 1-5)">Elementary School (Grades 1-5)</option>
               <option value="Middle School (Grades 6-8)">Middle School (Grades 6-8)</option>
@@ -149,7 +144,7 @@
               <option>Adult</option>
             </select>
           </div>
-          <button onclick="window.app.addAthlete()" style="width: 100%;">Add Athlete</button>
+          <button onclick="app.addAthlete()" style="width: 100%;">Add Athlete</button>
           <div id="athleteMsg"></div>
         </div>
         <table>
@@ -185,14 +180,18 @@
             <label>Value</label>
             <input type="number" id="assValue" placeholder="e.g., 42" step="0.1">
           </div>
-          <button onclick="window.app.addAssessment()" style="width: 100%;">Record</button>
+          <button onclick="app.addAssessment()" style="width: 100%;">Record</button>
           <div id="assMsg"></div>
         </div>
       </div>
     </div>
   </div>
 
-  <script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.0/dist/module.js" type="module"></script>
+  
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.0/dist/module.js';
+
     window.app = {
       supabase: null,
       GYM_ID: 'default_gym',
@@ -210,16 +209,22 @@
         { id: '11', display: 'Row 500M' }
       ],
 
-      init() {
-        const supabaseUrl = 'https://xylkwlsvxfqbmovladrf.supabase.co';
-        const supabaseKey = 'sb_publishable_ddVGmQFZDmf9HeHayCzWZQ_9ugeU7lb';
-        this.supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+      async init() {
+        this.supabase = createClient('https://xylkwlsvxfqbmovladrf.supabase.co', 'sb_publishable_ddVGmQFZDmf9HeHayCzWZQ_9ugeU7lb');
         
-        this.supabase.auth.onAuthStateChanged(user => {
-          if (user) {
+        const { data: { user } } = await this.supabase.auth.getUser();
+        if (user) {
+          document.getElementById('authSection').classList.add('hidden');
+          document.getElementById('appSection').classList.remove('hidden');
+          document.getElementById('userEmail').textContent = user.email;
+          this.loadData();
+        }
+
+        this.supabase.auth.onAuthStateChange((event, session) => {
+          if (session) {
             document.getElementById('authSection').classList.add('hidden');
             document.getElementById('appSection').classList.remove('hidden');
-            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('userEmail').textContent = session.user.email;
             this.loadData();
           } else {
             document.getElementById('authSection').classList.remove('hidden');
@@ -262,7 +267,7 @@
         if (error) {
           document.getElementById('signupError').textContent = error.message;
         } else {
-          document.getElementById('signupError').textContent = 'Check your email to confirm signup!';
+          document.getElementById('signupError').textContent = 'Account created! You can now log in.';
         }
       },
 
@@ -289,7 +294,6 @@
         const html = this.metrics.map(m => `<option value="${m.id}">${m.display}</option>`).join('');
         m1.innerHTML = html;
         m2.innerHTML = '<option value="">Select metric</option>' + html;
-        if (m1.value === '') m1.value = this.metrics[0].id;
       },
 
       async addAthlete() {
@@ -297,6 +301,7 @@
         const program = document.getElementById('athleteProgram').value;
         const msg = document.getElementById('athleteMsg');
         if (!name) { msg.innerHTML = '<span class="error">Enter name</span>'; return; }
+        
         const { error } = await this.supabase.from('athletes').insert([{ name, program, gym_id: this.GYM_ID }]);
         if (error) {
           msg.innerHTML = `<span class="error">${error.message}</span>`;
@@ -323,7 +328,7 @@
             <tr>
               <td>${a.name}</td>
               <td>${a.program}</td>
-              <td><button onclick="window.app.deleteAthlete('${a.id}')" style="background: #ff4444; width: auto;">Delete</button></td>
+              <td><button onclick="app.deleteAthlete('${a.id}')" style="background: #ff4444; width: auto;">Delete</button></td>
             </tr>
           `).join('');
         }
@@ -337,6 +342,7 @@
         const value = parseFloat(document.getElementById('assValue').value);
         const msg = document.getElementById('assMsg');
         if (!athleteId || !metricId || isNaN(value)) { msg.innerHTML = '<span class="error">Fill all fields</span>'; return; }
+        
         const { error } = await this.supabase.from('assessments').insert([{
           athlete_id: athleteId,
           metric_id: metricId,
@@ -357,27 +363,33 @@
         const metricId = document.getElementById('metricSelect').value;
         const program = document.getElementById('programSelect').value;
         if (!metricId) return;
+        
         const { data: assessments } = await this.supabase.from('assessments').select('*').eq('metric_id', metricId).eq('gym_id', this.GYM_ID);
         const { data: athletes } = await this.supabase.from('athletes').select('*').eq('gym_id', this.GYM_ID);
         const tbody = document.getElementById('leaderboardBody');
+        
         if (!assessments || assessments.length === 0) {
           tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">No data</td></tr>';
           return;
         }
+        
         const latest = {};
         assessments.forEach(a => {
           if (!latest[a.athlete_id] || new Date(a.recorded_at) > new Date(latest[a.athlete_id].recorded_at)) {
             latest[a.athlete_id] = a;
           }
         });
+        
         let ranked = Object.values(latest).map(a => ({
           score: a.value,
           athlete: athletes?.find(ath => ath.id === a.athlete_id)
         })).filter(r => r.athlete);
+        
         if (program) {
           ranked = ranked.filter(r => r.athlete.program === program);
         }
         ranked.sort((a, b) => b.score - a.score);
+        
         tbody.innerHTML = ranked.length === 0 ? '<tr><td colspan="4" style="text-align:center">No data</td></tr>' : ranked.map((r, i) => `
           <tr>
             <td>#${i+1}</td>
@@ -389,8 +401,7 @@
       }
     };
 
-    // Initialize
-    window.app.init();
+    app.init();
   </script>
 </body>
 </html>
