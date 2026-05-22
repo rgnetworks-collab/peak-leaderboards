@@ -4,96 +4,64 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>PEAK Leaderboards</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { 
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-      background: #f5f5f5; 
-      color: #333;
-      -webkit-user-select: none;
-      user-select: none;
-    }
-    input, button, select { -webkit-user-select: text; user-select: text; }
-    
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; }
     .hidden { display: none !important; }
-    header { background: white; padding: 20px; border-bottom: 1px solid #ddd; }
+    header { background: white; padding: 20px; border-bottom: 1px solid #ddd; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
     h1 { color: #0066cc; font-size: 28px; }
     .header-flex { display: flex; justify-content: space-between; align-items: center; }
     .user-info { display: flex; align-items: center; gap: 15px; font-size: 14px; }
-    
     .login-container { max-width: 400px; margin: 60px auto; padding: 40px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
     .login-container h1 { text-align: center; margin-bottom: 30px; }
-    
     .form-group { margin: 15px 0; }
     label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
-    input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
-    input:focus, select:focus { outline: none; border-color: #0066cc; }
-    
-    button { 
-      padding: 12px 20px; 
-      background: #0066cc; 
-      color: white; 
-      border: none; 
-      border-radius: 4px; 
-      cursor: pointer; 
-      font-weight: bold; 
-      font-size: 16px;
-      min-height: 44px;
-    }
+    input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; font-family: inherit; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #0066cc; box-shadow: 0 0 0 3px rgba(0,102,204,0.1); }
+    button { padding: 10px 20px; background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; min-height: 44px; }
     button:hover { background: #0052a3; }
     button.danger { background: #ff4444; }
+    button.danger:hover { background: #cc0000; }
     button.secondary { background: #666; }
-    
+    button.secondary:hover { background: #555; }
     .error { color: red; font-size: 12px; margin-top: 5px; }
     .success { color: green; font-size: 12px; margin-top: 5px; }
-    .info { color: #0066cc; font-size: 12px; margin-top: 5px; }
-    
-    nav { display: flex; gap: 10px; margin: 20px 0; border-bottom: 1px solid #ddd; overflow-x: auto; }
-    nav button { margin: 0; width: auto; border-radius: 0; border-bottom: 3px solid transparent; padding: 15px 20px; background: white; }
+    nav { display: flex; gap: 10px; margin: 20px 0; border-bottom: 1px solid #ddd; padding-bottom: 0; overflow-x: auto; }
+    nav button { margin: 0; display: inline-block; width: auto; border-radius: 0; border-bottom: 3px solid transparent; padding: 15px 20px; background: white; color: #333; white-space: nowrap; }
+    nav button:hover { color: #0066cc; }
     nav button.active { border-bottom-color: #0066cc; color: #0066cc; }
-    
     .section { display: none; }
     .section.active { display: block; }
-    
     h2 { margin: 30px 0 20px 0; font-size: 24px; }
     h3 { margin: 20px 0 15px 0; font-size: 18px; }
-    
-    table { width: 100%; border-collapse: collapse; background: white; margin: 20px 0; border-radius: 8px; }
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; font-size: 14px; }
+    table { width: 100%; border-collapse: collapse; background: white; margin: 20px 0; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
     th { background: #f0f0f0; font-weight: bold; }
-    
-    .form-box { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+    tr:hover { background: #f9f9f9; }
+    .filter-box { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .form-box { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .empty { text-align: center; color: #999; padding: 40px; }
+    .action-buttons { display: flex; gap: 5px; flex-wrap: wrap; }
+    .action-buttons button { padding: 4px 8px; font-size: 12px; width: auto; margin: 0; }
     .logo-header { display: flex; align-items: center; gap: 15px; }
     .logo-header img { height: 40px; width: 40px; border-radius: 50%; }
-    
-    .loading-spinner { 
-      display: inline-block; 
-      width: 20px; 
-      height: 20px; 
-      border: 3px solid #f3f3f3; 
-      border-top: 3px solid #0066cc; 
-      border-radius: 50%; 
-      animation: spin 1s linear infinite; 
+    @media (max-width: 768px) {
+      .filter-box { grid-template-columns: 1fr; }
     }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    
     @media (max-width: 480px) {
-      .login-container { margin: 20px; padding: 20px; }
-      button { padding: 12px 12px; min-height: 44px; }
-      input, select { padding: 12px; min-height: 44px; }
-      h1 { font-size: 22px; }
-      nav button { padding: 12px 15px; font-size: 12px; }
+      button { padding: 12px 12px; font-size: 16px; min-height: 44px; }
+      input, select { padding: 12px; font-size: 16px; min-height: 44px; }
+      nav button { padding: 12px 15px; font-size: 11px; }
     }
   </style>
 </head>
 <body>
-  <!-- LOGIN -->
+  <!-- LOGIN SCREEN -->
   <div id="loginScreen">
     <div class="login-container">
-      <img src="logo.png" alt="PEAK" style="height: 80px; width: 80px; border-radius: 50%; margin: 0 auto 20px; display: block;">
+      <img src="logo.png" alt="PEAK" style="height: 80px; width: 80px; border-radius: 50%; margin: 0 auto 20px; display: block; max-width: 100%;">
       <h1>PEAK</h1>
       <p style="text-align: center; color: #666; margin-bottom: 30px;">Leaderboards</p>
       
@@ -105,75 +73,108 @@
       <div id="coachLoginForm">
         <div class="form-group">
           <label>Coach Name</label>
-          <input type="text" id="coachName" placeholder="Your name" autocomplete="off">
+          <input type="text" id="coachName" placeholder="Your name">
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input type="password" id="password" placeholder="Password" autocomplete="off">
+          <input type="password" id="password" placeholder="Password">
         </div>
-        <button id="loginBtn" onclick="app.login()" style="width: 100%;">
-          <span id="loginBtnText">Sign In</span>
-        </button>
+        <button onclick="app.login()" style="width: 100%;">Sign In</button>
         <div id="loginError" class="error" style="text-align: center; margin-top: 10px;"></div>
-        <p style="text-align: center; margin-top: 20px; font-size: 12px; color: #999;">Use your coach credentials to login</p>
       </div>
 
       <div id="athleteLoginForm" class="hidden">
         <div class="form-group">
           <label>Athlete Name</label>
-          <input type="text" id="athleteName" placeholder="Your name" autocomplete="off">
+          <input type="text" id="athleteName" placeholder="Your name">
         </div>
         <div class="form-group">
           <label>Access Code</label>
-          <input type="text" id="athleteCode" placeholder="Access code" autocomplete="off" style="text-transform: uppercase;">
+          <input type="text" id="athleteCode" placeholder="Access code (ask your coach)">
         </div>
-        <button id="athleteLoginBtn" onclick="app.athleteLogin()" style="width: 100%;">
-          <span id="athleteLoginBtnText">View Leaderboard</span>
-        </button>
+        <button onclick="app.athleteLogin()" style="width: 100%;">View Leaderboard</button>
         <div id="athleteLoginError" class="error" style="text-align: center; margin-top: 10px;"></div>
       </div>
     </div>
   </div>
 
-  <!-- COACH APP -->
+  <!-- COACH APP SCREEN -->
   <div id="appScreen" class="hidden">
     <header>
       <div class="container">
         <div class="header-flex">
           <div class="logo-header">
-            <img src="logo.png" alt="PEAK">
-            <h1 style="margin: 0; font-size: 20px;">PEAK</h1>
+            <img src="logo.png" alt="PEAK" style="height: 40px; width: 40px; border-radius: 50%; max-width: 100%;">
+            <h1 style="margin: 0;">PEAK Leaderboards</h1>
           </div>
           <div class="user-info">
-            <span id="coachDisplay" style="font-size: 12px;"></span>
-            <button onclick="app.logout()" style="width: auto; padding: 8px 16px; font-size: 12px;">Logout</button>
+            <span id="coachDisplay"></span>
+            <button onclick="app.logout()" style="width: auto;">Logout</button>
           </div>
         </div>
       </div>
     </header>
+
     <div class="container">
       <nav>
         <button class="nav-btn active" onclick="app.section('dashboard', this)">Dashboard</button>
         <button class="nav-btn" onclick="app.section('athletes', this)">Athletes</button>
+        <button class="nav-btn" onclick="app.section('assessments', this)">Assessments</button>
+        <button class="nav-btn" onclick="app.section('history', this)">History</button>
+        <button class="nav-btn" onclick="app.section('metrics', this)">Metrics</button>
         <button class="nav-btn" onclick="app.section('coaches', this)">Coaches</button>
       </nav>
-      
+
+      <!-- Dashboard -->
       <div id="dashboard" class="section active">
-        <h2>Dashboard</h2>
-        <p>Welcome, <span id="coachName" style="font-weight: bold;"></span>!</p>
+        <h2>Leaderboards</h2>
+        <div class="filter-box">
+          <div>
+            <label>Assessment</label>
+            <select id="metricSelect" onchange="app.renderLeaderboard()">
+              <option value="">Select metric...</option>
+            </select>
+          </div>
+          <div>
+            <label>Program</label>
+            <select id="programSelect" onchange="app.renderLeaderboard()">
+              <option value="">All Programs</option>
+              <option value="Elementary School (Grades 1-5)">Elementary School (Grades 1-5)</option>
+              <option value="Middle School (Grades 6-8)">Middle School (Grades 6-8)</option>
+              <option value="High School (Grades 9-12)">High School (Grades 9-12)</option>
+              <option value="College">College</option>
+              <option value="Adult">Adult</option>
+            </select>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Athlete</th>
+              <th>Program</th>
+              <th style="text-align: right;">Score</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardBody">
+            <tr><td colspan="4" class="empty">Select a metric to view leaderboard</td></tr>
+          </tbody>
+        </table>
       </div>
 
+      <!-- Athletes -->
       <div id="athletes" class="section">
-        <h2>Athletes</h2>
+        <h2>Manage Athletes</h2>
         <div class="form-box">
           <h3>Add Athlete</h3>
           <div class="form-group">
-            <label>Name</label>
-            <input type="text" id="newAthleteName" placeholder="Name">
+            <label>Athlete Name</label>
+            <input type="text" id="athleteName" placeholder="Name">
           </div>
           <div class="form-group">
             <label>Program</label>
-            <select id="newAthleteProgram">
+            <select id="athleteProgram">
               <option>Elementary School (Grades 1-5)</option>
               <option>Middle School (Grades 6-8)</option>
               <option>High School (Grades 9-12)</option>
@@ -184,54 +185,198 @@
           <button onclick="app.addAthlete()" style="width: 100%;">Add Athlete</button>
           <div id="athleteMsg"></div>
         </div>
+
         <table>
-          <thead><tr><th>Name</th><th>Program</th><th>Code</th><th>Action</th></tr></thead>
-          <tbody id="athletesBody"><tr><td colspan="4" style="text-align: center; padding: 40px; color: #999;">Loading...</td></tr></tbody>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Program</th>
+              <th>Assessments</th>
+              <th>Access Code</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="athletesBody">
+            <tr><td colspan="5" class="empty">No athletes yet</td></tr>
+          </tbody>
         </table>
       </div>
 
+      <!-- Assessments -->
+      <div id="assessments" class="section">
+        <h2>Record Assessment</h2>
+        <div class="form-box">
+          <h3>Add New Assessment</h3>
+          <div class="form-group">
+            <label>Athlete</label>
+            <select id="assAthlete">
+              <option value="">Select athlete...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Metric</label>
+            <select id="assMetric">
+              <option value="">Select metric...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Value</label>
+            <input type="number" id="assValue" placeholder="e.g., 42" step="0.1">
+          </div>
+          <button onclick="app.addAssessment()" style="width: 100%;">Record Assessment</button>
+          <div id="assMsg"></div>
+        </div>
+
+        <h3>All Assessments</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Athlete</th>
+              <th>Metric</th>
+              <th>Value</th>
+              <th>Date</th>
+              <th>Recorded By</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="assessmentsTableBody">
+            <tr><td colspan="6" class="empty">No assessments yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- History -->
+      <div id="history" class="section">
+        <h2>Assessment History</h2>
+        <button onclick="app.exportToCSV()" style="margin-bottom: 20px; background: #0066cc;">📥 Export to CSV</button>
+        <table>
+          <thead>
+            <tr>
+              <th>Athlete</th>
+              <th>Metric</th>
+              <th>Value</th>
+              <th>Date</th>
+              <th>Recorded By</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody">
+            <tr><td colspan="6" class="empty">No assessments yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Metrics -->
+      <div id="metrics" class="section">
+        <h2>Manage Metrics</h2>
+        <div class="form-box">
+          <h3>Add New Metric</h3>
+          <div class="form-group">
+            <label>Metric Name</label>
+            <input type="text" id="newMetricName" placeholder="e.g., Deadlift 1RM">
+          </div>
+          <button onclick="app.addMetric()" style="width: 100%;">Add Metric</button>
+          <div id="metricMsg"></div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Metric Name</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="metricsBody">
+            <tr><td colspan="3" class="empty">Loading metrics...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Coaches -->
       <div id="coaches" class="section">
         <h2>Manage Coaches</h2>
         <div class="form-box">
-          <h3>Add Coach</h3>
+          <h3>Add New Coach</h3>
           <div class="form-group">
-            <label>Name</label>
-            <input type="text" id="newCoachName" placeholder="Name">
+            <label>Coach Name</label>
+            <input type="text" id="newCoachName" placeholder="Coach name">
           </div>
           <div class="form-group">
             <label>Password</label>
-            <input type="password" id="newCoachPass" placeholder="Password (min 6 chars)">
+            <input type="password" id="newCoachPassword" placeholder="Password (min 6 chars)">
           </div>
           <button onclick="app.addCoach()" style="width: 100%;">Add Coach</button>
           <div id="coachMsg"></div>
         </div>
+
         <table>
-          <thead><tr><th>Name</th><th>Action</th></tr></thead>
-          <tbody id="coachesBody"><tr><td colspan="2" style="text-align: center; padding: 40px; color: #999;">Loading...</td></tr></tbody>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="coachesBody">
+            <tr><td colspan="2" class="empty">No coaches yet</td></tr>
+          </tbody>
         </table>
       </div>
     </div>
   </div>
 
-  <!-- ATHLETE APP -->
+  <!-- ATHLETE SCREEN (Read-Only) -->
   <div id="athleteScreen" class="hidden">
     <header>
       <div class="container">
         <div class="header-flex">
           <div class="logo-header">
-            <img src="logo.png" alt="PEAK">
-            <h1 style="margin: 0; font-size: 20px;">PEAK</h1>
+            <img src="logo.png" alt="PEAK" style="height: 40px; width: 40px; border-radius: 50%; max-width: 100%;">
+            <h1 style="margin: 0;">PEAK Leaderboards</h1>
           </div>
           <div class="user-info">
-            <span id="athleteDisplay" style="font-size: 12px;"></span>
-            <button onclick="app.logout()" style="width: auto; padding: 8px 16px; font-size: 12px;">Logout</button>
+            <span id="athleteDisplay"></span>
+            <button onclick="app.logout()" style="width: auto;">Logout</button>
           </div>
         </div>
       </div>
     </header>
+
     <div class="container">
-      <h2>Leaderboards</h2>
-      <p>Athlete read-only view</p>
+      <h2 style="margin-top: 40px;">Leaderboards</h2>
+      <div class="filter-box">
+        <div>
+          <label>Assessment</label>
+          <select id="athleteMetricSelect" onchange="app.renderAthleteLeaderboard()">
+            <option value="">Select metric...</option>
+          </select>
+        </div>
+        <div>
+          <label>Program</label>
+          <select id="athleteProgramSelect" onchange="app.renderAthleteLeaderboard()">
+            <option value="">All Programs</option>
+            <option value="Elementary School (Grades 1-5)">Elementary School (Grades 1-5)</option>
+            <option value="Middle School (Grades 6-8)">Middle School (Grades 6-8)</option>
+            <option value="High School (Grades 9-12)">High School (Grades 9-12)</option>
+            <option value="College">College</option>
+            <option value="Adult">Adult</option>
+          </select>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Athlete</th>
+            <th>Program</th>
+            <th style="text-align: right;">Score</th>
+          </tr>
+        </thead>
+        <tbody id="athleteLeaderboardBody">
+          <tr><td colspan="4" class="empty">Select a metric to view leaderboard</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
@@ -239,11 +384,17 @@
     const SUPABASE_URL = 'https://eavcqgsjxvaisrfkrswq.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_a6hb7wOMpE5j9pVQI9S-ig_ewNS1iDv';
 
-    window.app = {
+    const app = {
       currentCoach: null,
       currentAthlete: null,
+      editingId: null,
+      metrics: {},
 
       init() {
+        this.loadUser();
+      },
+
+      loadUser() {
         const coach = localStorage.getItem('peakCurrentCoach');
         const athlete = localStorage.getItem('peakCurrentAthlete');
         
@@ -279,28 +430,17 @@
         const name = document.getElementById('coachName').value.trim();
         const pass = document.getElementById('password').value;
         const err = document.getElementById('loginError');
-        const btn = document.getElementById('loginBtn');
-        const btnText = document.getElementById('loginBtnText');
 
         if (!name || !pass) { err.textContent = 'Fill all fields'; return; }
 
-        btn.disabled = true;
-        btnText.innerHTML = '<span class="loading-spinner"></span>';
-
         try {
-          const url = `${SUPABASE_URL}/rest/v1/coaches?name=eq.${encodeURIComponent(name)}&limit=1`;
-          const res = await fetch(url, {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/coaches?name=eq.${encodeURIComponent(name)}`, {
             headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY }
           });
-          
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          
           const coaches = await res.json();
           
-          if (!Array.isArray(coaches) || !coaches.length || coaches[0].password !== pass) {
+          if (!coaches.length || coaches[0].password !== pass) {
             err.textContent = 'Invalid credentials';
-            btn.disabled = false;
-            btnText.textContent = 'Sign In';
             return;
           }
 
@@ -309,38 +449,25 @@
           this.currentCoach = name;
           this.showApp();
         } catch (e) {
-          err.textContent = 'Network error: ' + e.message;
-          btn.disabled = false;
-          btnText.textContent = 'Sign In';
+          err.textContent = 'Error: ' + e.message;
         }
       },
 
       async athleteLogin() {
         const name = document.getElementById('athleteName').value.trim();
-        const code = document.getElementById('athleteCode').value.trim().toUpperCase();
+        const code = document.getElementById('athleteCode').value.trim();
         const err = document.getElementById('athleteLoginError');
-        const btn = document.getElementById('athleteLoginBtn');
-        const btnText = document.getElementById('athleteLoginBtnText');
 
         if (!name || !code) { err.textContent = 'Fill all fields'; return; }
 
-        btn.disabled = true;
-        btnText.innerHTML = '<span class="loading-spinner"></span>';
-
         try {
-          const url = `${SUPABASE_URL}/rest/v1/athletes?code=eq.${encodeURIComponent(code)}&limit=1`;
-          const res = await fetch(url, {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/athletes?code=eq.${encodeURIComponent(code)}`, {
             headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY }
           });
-          
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          
           const athletes = await res.json();
 
-          if (!Array.isArray(athletes) || !athletes.length || athletes[0].name.toLowerCase() !== name.toLowerCase()) {
+          if (!athletes.length || athletes[0].name.toLowerCase() !== name.toLowerCase()) {
             err.textContent = 'Invalid credentials';
-            btn.disabled = false;
-            btnText.textContent = 'View Leaderboard';
             return;
           }
 
@@ -349,9 +476,7 @@
           this.currentAthlete = name;
           this.showAthleteApp();
         } catch (e) {
-          err.textContent = 'Network error: ' + e.message;
-          btn.disabled = false;
-          btnText.textContent = 'View Leaderboard';
+          err.textContent = 'Error: ' + e.message;
         }
       },
 
@@ -361,10 +486,6 @@
         this.currentCoach = null;
         this.currentAthlete = null;
         this.showLogin();
-        document.getElementById('coachName').value = '';
-        document.getElementById('password').value = '';
-        document.getElementById('athleteName').value = '';
-        document.getElementById('athleteCode').value = '';
       },
 
       showApp() {
@@ -372,9 +493,7 @@
         document.getElementById('appScreen').classList.remove('hidden');
         document.getElementById('athleteScreen').classList.add('hidden');
         document.getElementById('coachDisplay').textContent = this.currentCoach;
-        document.getElementById('coachName').textContent = this.currentCoach;
-        this.loadCoaches();
-        this.loadAthletes();
+        this.loadData();
       },
 
       showAthleteApp() {
@@ -382,6 +501,8 @@
         document.getElementById('appScreen').classList.add('hidden');
         document.getElementById('athleteScreen').classList.remove('hidden');
         document.getElementById('athleteDisplay').textContent = this.currentAthlete;
+        this.loadMetrics();
+        this.renderAthleteLeaderboard();
       },
 
       section(name, btn) {
@@ -391,22 +512,43 @@
         btn.classList.add('active');
       },
 
-      async loadCoaches() {
+      async loadData() {
+        await this.loadMetrics();
+        await this.loadAthletes();
+        await this.loadAssessments();
+        this.renderLeaderboard();
+        this.renderAthletes();
+        this.renderAssessments();
+        this.renderHistory();
+        this.renderMetrics();
+        this.renderCoaches();
+      },
+
+      async loadMetrics() {
         try {
-          const res = await fetch(`${SUPABASE_URL}/rest/v1/coaches`, {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/metrics?order=id`, {
             headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY }
           });
-          const coaches = await res.json();
-          const tbody = document.getElementById('coachesBody');
-          tbody.innerHTML = coaches.map(c => `
-            <tr>
-              <td>${c.name}</td>
-              <td><button onclick="app.deleteCoach('${c.id}')" class="danger" style="width: auto; padding: 4px 8px; font-size: 12px;">Delete</button></td>
-            </tr>
-          `).join('') || '<tr><td colspan="2" style="text-align: center; color: #999;">No coaches</td></tr>';
+          const metrics = await res.json();
+          this.metrics = {};
+          metrics.forEach(m => this.metrics[m.id] = m.name);
+          this.updateMetricSelects();
         } catch (e) {
-          console.error('Error:', e);
+          console.error('Error loading metrics:', e);
         }
+      },
+
+      updateMetricSelects() {
+        const selects = ['metricSelect', 'assMetric', 'athleteMetricSelect'];
+        selects.forEach(selectId => {
+          const select = document.getElementById(selectId);
+          if (select) {
+            const current = select.value;
+            select.innerHTML = '<option value="">Select metric...</option>' +
+              Object.entries(this.metrics).map(([id, name]) => `<option value="${id}">${name}</option>`).join('');
+            select.value = current;
+          }
+        });
       },
 
       async loadAthletes() {
@@ -414,99 +556,539 @@
           const res = await fetch(`${SUPABASE_URL}/rest/v1/athletes`, {
             headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY }
           });
-          const athletes = await res.json();
-          const tbody = document.getElementById('athletesBody');
-          tbody.innerHTML = athletes.map(a => `
-            <tr>
-              <td>${a.name}</td>
-              <td>${a.program}</td>
-              <td style="font-family: monospace; color: #0066cc; font-weight: bold; font-size: 12px;">${a.code}</td>
-              <td><button onclick="app.deleteAthlete('${a.id}')" class="danger" style="width: auto; padding: 4px 8px; font-size: 12px;">Delete</button></td>
-            </tr>
-          `).join('') || '<tr><td colspan="4" style="text-align: center; color: #999;">No athletes</td></tr>';
+          return await res.json();
         } catch (e) {
-          console.error('Error:', e);
+          console.error('Error loading athletes:', e);
+          return [];
+        }
+      },
+
+      async loadAssessments() {
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/assessments`, {
+            headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY }
+          });
+          return await res.json();
+        } catch (e) {
+          console.error('Error loading assessments:', e);
+          return [];
         }
       },
 
       async addAthlete() {
-        const name = document.getElementById('newAthleteName').value.trim();
-        const program = document.getElementById('newAthleteProgram').value;
+        const name = document.getElementById('athleteName').value.trim();
+        const program = document.getElementById('athleteProgram').value;
         const msg = document.getElementById('athleteMsg');
 
-        if (!name) { msg.innerHTML = '<span class="error">Enter name</span>'; return; }
+        if (!name) { msg.innerHTML = '<span class="error">Enter athlete name</span>'; return; }
 
         const code = Math.random().toString(36).substring(2, 8).toUpperCase();
 
         try {
           const res = await fetch(`${SUPABASE_URL}/rest/v1/athletes`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+            headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
             body: JSON.stringify({ name, program, code })
           });
 
           if (res.ok) {
-            document.getElementById('newAthleteName').value = '';
-            msg.innerHTML = `<span class="success">Added! Code: <strong>${code}</strong></span>`;
+            document.getElementById('athleteName').value = '';
+            msg.innerHTML = `<span class="success">Athlete added! Access Code: <strong>${code}</strong></span>`;
             this.loadAthletes();
+            this.renderAthletes();
           } else {
-            msg.innerHTML = '<span class="error">Error</span>';
+            msg.innerHTML = '<span class="error">Error adding athlete</span>';
           }
         } catch (e) {
           msg.innerHTML = '<span class="error">Error: ' + e.message + '</span>';
+        }
+      },
+
+      async addAssessment() {
+        const athleteId = document.getElementById('assAthlete').value;
+        const metricId = document.getElementById('assMetric').value;
+        const value = parseFloat(document.getElementById('assValue').value);
+        const msg = document.getElementById('assMsg');
+
+        if (!athleteId || !metricId || isNaN(value)) {
+          msg.innerHTML = '<span class="error">Fill all fields</span>';
+          return;
+        }
+
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/assessments`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+            body: JSON.stringify({
+              athlete_id: athleteId,
+              metric_id: parseInt(metricId),
+              value,
+              recorded_by: this.currentCoach,
+              recorded_at: new Date().toISOString()
+            })
+          });
+
+          if (res.ok) {
+            document.getElementById('assValue').value = '';
+            msg.innerHTML = '<span class="success">Assessment recorded!</span>';
+            this.loadAssessments();
+            this.renderAssessments();
+            this.renderHistory();
+            this.renderLeaderboard();
+          } else {
+            msg.innerHTML = '<span class="error">Error recording assessment</span>';
+          }
+        } catch (e) {
+          msg.innerHTML = '<span class="error">Error: ' + e.message + '</span>';
+        }
+      },
+
+      async renderAthletes() {
+        try {
+          const athletes = await this.loadAthletes();
+          const assessments = await this.loadAssessments();
+          const tbody = document.getElementById('athletesBody');
+
+          if (athletes.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="empty">No athletes yet</td></tr>';
+          } else {
+            tbody.innerHTML = athletes.map(a => {
+              const count = assessments.filter(as => as.athlete_id === a.id).length;
+              return `
+                <tr>
+                  <td>${a.name}</td>
+                  <td>${a.program}</td>
+                  <td>${count}</td>
+                  <td style="font-family: monospace; font-weight: bold; color: #0066cc; font-size: 13px;">${a.code}</td>
+                  <td><button onclick="app.deleteAthlete('${a.id}')" class="danger" style="width: auto; padding: 6px 12px; font-size: 12px;">Delete</button></td>
+                </tr>
+              `;
+            }).join('');
+          }
+
+          const sel = document.getElementById('assAthlete');
+          sel.innerHTML = '<option value="">Select athlete...</option>' + athletes.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+        } catch (e) {
+          console.error('Error rendering athletes:', e);
+        }
+      },
+
+      async renderAssessments() {
+        try {
+          const athletes = await this.loadAthletes();
+          const assessments = await this.loadAssessments();
+          const tbody = document.getElementById('assessmentsTableBody');
+
+          if (assessments.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="empty">No assessments yet</td></tr>';
+            return;
+          }
+
+          const sorted = [...assessments].sort((a, b) => new Date(b.recorded_at) - new Date(a.recorded_at));
+
+          tbody.innerHTML = sorted.map(a => {
+            const athlete = athletes.find(ath => ath.id === a.athlete_id);
+            const date = new Date(a.recorded_at).toLocaleDateString();
+            const metric = this.metrics[a.metric_id] || a.metric_id;
+            
+            return `
+              <tr>
+                <td>${athlete?.name || 'Unknown'}</td>
+                <td>${metric}</td>
+                <td>${a.value}</td>
+                <td>${date}</td>
+                <td>${a.recorded_by}</td>
+                <td>
+                  <div class="action-buttons">
+                    <button onclick="app.editAssessment('${a.id}', ${a.value})" style="background: #0066cc;">Edit</button>
+                    <button onclick="app.deleteAssessment('${a.id}')" class="danger">Delete</button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        } catch (e) {
+          console.error('Error rendering assessments:', e);
+        }
+      },
+
+      async renderHistory() {
+        try {
+          const athletes = await this.loadAthletes();
+          const assessments = await this.loadAssessments();
+          const tbody = document.getElementById('historyBody');
+
+          if (assessments.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="empty">No assessments yet</td></tr>';
+            return;
+          }
+
+          const sorted = [...assessments].sort((a, b) => new Date(b.recorded_at) - new Date(a.recorded_at));
+
+          tbody.innerHTML = sorted.map(a => {
+            const athlete = athletes.find(ath => ath.id === a.athlete_id);
+            const date = new Date(a.recorded_at).toLocaleDateString();
+            const metric = this.metrics[a.metric_id] || a.metric_id;
+            
+            return `
+              <tr>
+                <td>${athlete?.name || 'Unknown'}</td>
+                <td>${metric}</td>
+                <td>${a.value}</td>
+                <td>${date}</td>
+                <td>${a.recorded_by}</td>
+                <td>
+                  <div class="action-buttons">
+                    <button onclick="app.editAssessment('${a.id}', ${a.value})" style="background: #0066cc;">Edit</button>
+                    <button onclick="app.deleteAssessment('${a.id}')" class="danger">Delete</button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        } catch (e) {
+          console.error('Error rendering history:', e);
+        }
+      },
+
+      async renderLeaderboard() {
+        const metricId = document.getElementById('metricSelect').value;
+        const program = document.getElementById('programSelect').value;
+
+        if (!metricId) {
+          document.getElementById('leaderboardBody').innerHTML = '<tr><td colspan="4" class="empty">Select a metric to view leaderboard</td></tr>';
+          return;
+        }
+
+        try {
+          const athletes = await this.loadAthletes();
+          const assessments = await this.loadAssessments();
+
+          const relevant = assessments.filter(a => a.metric_id === parseInt(metricId));
+          const latest = {};
+
+          relevant.forEach(a => {
+            if (!latest[a.athlete_id] || new Date(a.recorded_at) > new Date(latest[a.athlete_id].recorded_at)) {
+              latest[a.athlete_id] = a;
+            }
+          });
+
+          let ranked = Object.values(latest).map(a => ({
+            score: a.value,
+            athlete: athletes.find(ath => ath.id === a.athlete_id)
+          })).filter(r => r.athlete);
+
+          if (program) {
+            ranked = ranked.filter(r => r.athlete.program === program);
+          }
+
+          ranked.sort((a, b) => b.score - a.score);
+
+          const tbody = document.getElementById('leaderboardBody');
+          if (ranked.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="empty">No data for this metric</td></tr>';
+          } else {
+            tbody.innerHTML = ranked.map((r, i) => `
+              <tr>
+                <td><strong>#${i + 1}</strong></td>
+                <td>${r.athlete.name}</td>
+                <td>${r.athlete.program}</td>
+                <td style="text-align: right; font-weight: bold; color: #0066cc;">${r.score}</td>
+              </tr>
+            `).join('');
+          }
+        } catch (e) {
+          console.error('Error rendering leaderboard:', e);
+        }
+      },
+
+      async renderAthleteLeaderboard() {
+        const metricId = document.getElementById('athleteMetricSelect').value;
+        const program = document.getElementById('athleteProgramSelect').value;
+
+        if (!metricId) {
+          document.getElementById('athleteLeaderboardBody').innerHTML = '<tr><td colspan="4" class="empty">Select a metric to view leaderboard</td></tr>';
+          return;
+        }
+
+        try {
+          const athletes = await this.loadAthletes();
+          const assessments = await this.loadAssessments();
+
+          const relevant = assessments.filter(a => a.metric_id === parseInt(metricId));
+          const latest = {};
+
+          relevant.forEach(a => {
+            if (!latest[a.athlete_id] || new Date(a.recorded_at) > new Date(latest[a.athlete_id].recorded_at)) {
+              latest[a.athlete_id] = a;
+            }
+          });
+
+          let ranked = Object.values(latest).map(a => ({
+            score: a.value,
+            athlete: athletes.find(ath => ath.id === a.athlete_id)
+          })).filter(r => r.athlete);
+
+          if (program) {
+            ranked = ranked.filter(r => r.athlete.program === program);
+          }
+
+          ranked.sort((a, b) => b.score - a.score);
+
+          const tbody = document.getElementById('athleteLeaderboardBody');
+          if (ranked.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="empty">No data for this metric</td></tr>';
+          } else {
+            tbody.innerHTML = ranked.map((r, i) => `
+              <tr>
+                <td><strong>#${i + 1}</strong></td>
+                <td>${r.athlete.name}</td>
+                <td>${r.athlete.program}</td>
+                <td style="text-align: right; font-weight: bold; color: #0066cc;">${r.score}</td>
+              </tr>
+            `).join('');
+          }
+        } catch (e) {
+          console.error('Error rendering athlete leaderboard:', e);
+        }
+      },
+
+      async renderMetrics() {
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/metrics?order=id`, {
+            headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY }
+          });
+          const metrics = await res.json();
+          const tbody = document.getElementById('metricsBody');
+
+          if (metrics.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" class="empty">No metrics yet</td></tr>';
+          } else {
+            tbody.innerHTML = metrics.map(m => `
+              <tr>
+                <td><strong>${m.id}</strong></td>
+                <td>${m.name}</td>
+                <td><button onclick="app.deleteMetric(${m.id})" class="danger" style="width: auto; padding: 6px 12px; font-size: 12px;">Delete</button></td>
+              </tr>
+            `).join('');
+          }
+        } catch (e) {
+          console.error('Error rendering metrics:', e);
+        }
+      },
+
+      async renderCoaches() {
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/coaches`, {
+            headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY }
+          });
+          const coaches = await res.json();
+          const tbody = document.getElementById('coachesBody');
+
+          if (coaches.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="2" class="empty">No coaches yet</td></tr>';
+          } else {
+            tbody.innerHTML = coaches.map(c => `
+              <tr>
+                <td>${c.name}</td>
+                <td><button onclick="app.deleteCoach('${c.id}')" class="danger" style="width: auto; padding: 6px 12px; font-size: 12px;">Delete</button></td>
+              </tr>
+            `).join('');
+          }
+        } catch (e) {
+          console.error('Error rendering coaches:', e);
+        }
+      },
+
+      async addMetric() {
+        const name = document.getElementById('newMetricName').value.trim();
+        const msg = document.getElementById('metricMsg');
+
+        if (!name) { msg.innerHTML = '<span class="error">Enter metric name</span>'; return; }
+
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/metrics`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+            body: JSON.stringify({ name })
+          });
+
+          if (res.ok) {
+            document.getElementById('newMetricName').value = '';
+            msg.innerHTML = '<span class="success">Metric added!</span>';
+            this.loadMetrics();
+            this.renderMetrics();
+          } else {
+            msg.innerHTML = '<span class="error">Error adding metric</span>';
+          }
+        } catch (e) {
+          msg.innerHTML = '<span class="error">Error: ' + e.message + '</span>';
+        }
+      },
+
+      async deleteMetric(id) {
+        if (!confirm('Delete this metric?')) return;
+
+        try {
+          await fetch(`${SUPABASE_URL}/rest/v1/metrics?id=eq.${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY }
+          });
+
+          this.loadMetrics();
+          this.renderMetrics();
+        } catch (e) {
+          alert('Error: ' + e.message);
         }
       },
 
       async addCoach() {
         const name = document.getElementById('newCoachName').value.trim();
-        const pass = document.getElementById('newCoachPass').value;
+        const pass = document.getElementById('newCoachPassword').value;
         const msg = document.getElementById('coachMsg');
 
-        if (!name || pass.length < 6) { msg.innerHTML = '<span class="error">Invalid</span>'; return; }
+        if (!name) { msg.innerHTML = '<span class="error">Enter coach name</span>'; return; }
+        if (pass.length < 6) { msg.innerHTML = '<span class="error">Password must be at least 6 characters</span>'; return; }
 
         try {
           const res = await fetch(`${SUPABASE_URL}/rest/v1/coaches`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+            headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
             body: JSON.stringify({ name, password: pass })
           });
 
           if (res.ok) {
             document.getElementById('newCoachName').value = '';
-            document.getElementById('newCoachPass').value = '';
-            msg.innerHTML = '<span class="success">Coach added!</span>';
-            this.loadCoaches();
+            document.getElementById('newCoachPassword').value = '';
+            msg.innerHTML = '<span class="success">Coach added successfully!</span>';
+            this.renderCoaches();
           } else {
-            msg.innerHTML = '<span class="error">Name taken</span>';
+            msg.innerHTML = '<span class="error">Coach already exists</span>';
           }
         } catch (e) {
           msg.innerHTML = '<span class="error">Error: ' + e.message + '</span>';
         }
       },
 
-      async deleteAthlete(id) {
-        if (!confirm('Delete?')) return;
-        try {
-          await fetch(`${SUPABASE_URL}/rest/v1/athletes?id=eq.${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY }
-          });
-          this.loadAthletes();
-        } catch (e) {
-          alert('Error: ' + e.message);
-        }
-      },
-
       async deleteCoach(id) {
-        if (!confirm('Delete?')) return;
+        if (!confirm('Delete this coach?')) return;
+
         try {
           await fetch(`${SUPABASE_URL}/rest/v1/coaches?id=eq.${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY }
           });
-          this.loadCoaches();
+
+          this.renderCoaches();
         } catch (e) {
           alert('Error: ' + e.message);
+        }
+      },
+
+      async deleteAthlete(id) {
+        if (!confirm('Delete this athlete and all their assessments?')) return;
+
+        try {
+          await fetch(`${SUPABASE_URL}/rest/v1/athletes?id=eq.${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY }
+          });
+
+          this.loadAthletes();
+          this.loadAssessments();
+          this.renderAthletes();
+          this.renderLeaderboard();
+          this.renderHistory();
+        } catch (e) {
+          alert('Error: ' + e.message);
+        }
+      },
+
+      async deleteAssessment(id) {
+        if (!confirm('Delete this assessment?')) return;
+
+        try {
+          await fetch(`${SUPABASE_URL}/rest/v1/assessments?id=eq.${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY }
+          });
+
+          this.loadAssessments();
+          this.renderAssessments();
+          this.renderHistory();
+          this.renderLeaderboard();
+        } catch (e) {
+          alert('Error: ' + e.message);
+        }
+      },
+
+      editAssessment(id, value) {
+        this.editingId = id;
+        const newValue = prompt('New value:', value);
+        if (newValue !== null) {
+          this.saveEdit(parseFloat(newValue));
+        }
+      },
+
+      async saveEdit(value) {
+        if (isNaN(value)) { alert('Enter a valid number'); return; }
+
+        try {
+          await fetch(`${SUPABASE_URL}/rest/v1/assessments?id=eq.${this.editingId}`, {
+            method: 'PATCH',
+            headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+            body: JSON.stringify({ value })
+          });
+
+          this.editingId = null;
+          this.loadAssessments();
+          this.renderAssessments();
+          this.renderHistory();
+          this.renderLeaderboard();
+        } catch (e) {
+          alert('Error: ' + e.message);
+        }
+      },
+
+      async exportToCSV() {
+        try {
+          const athletes = await this.loadAthletes();
+          const assessments = await this.loadAssessments();
+
+          if (assessments.length === 0) {
+            alert('No assessments to export');
+            return;
+          }
+
+          const sorted = [...assessments].sort((a, b) => new Date(a.recorded_at) - new Date(b.recorded_at));
+          const rows = [['Athlete', 'Metric', 'Value', 'Date', 'Recorded By']];
+
+          sorted.forEach(a => {
+            const athlete = athletes.find(ath => ath.id === a.athlete_id);
+            const metric = this.metrics[a.metric_id] || a.metric_id;
+            const date = new Date(a.recorded_at).toLocaleDateString();
+            
+            rows.push([
+              athlete?.name || 'Unknown',
+              metric,
+              a.value,
+              date,
+              a.recorded_by
+            ]);
+          });
+
+          const csv = rows.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+          const blob = new Blob([csv], { type: 'text/csv' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `peak-assessments-${new Date().toISOString().split('T')[0]}.csv`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+        } catch (e) {
+          alert('Export error: ' + e.message);
         }
       }
     };
