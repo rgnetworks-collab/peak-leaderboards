@@ -1258,7 +1258,20 @@
       }
     };
 
-    app.init();
+    // Initialize after DOM loads
+    setTimeout(() => {
+      app.loadUser();
+      window.addEventListener("storage", () => app.refreshData());
+    }, 100);
+
+    // Ensure DOM is ready before running
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => app.showLogin(), 100);
+      });
+    } else {
+      setTimeout(() => app.showLogin(), 100);
+    }
   </script>
 </body>
 </html>
