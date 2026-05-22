@@ -89,28 +89,7 @@
         <div id="loginError" class="error" style="text-align: center; margin-top: 10px;"></div>
       </div>
 
-      <div id="setupForm" class="hidden">
-        <p style="text-align: center; margin-bottom: 20px; color: #666;">First time? Set your password</p>
-        <div class="form-group">
-          <label>Coach Name</label>
-          <input type="text" id="setupName" placeholder="Your name">
-        </div>
-        <div class="form-group">
-          <label>Create Password</label>
-          <input type="password" id="setupPassword" placeholder="Password (min 6 chars)">
-        </div>
-        <div class="form-group">
-          <label>Confirm Password</label>
-          <input type="password" id="setupPassword2" placeholder="Confirm password">
-        </div>
-        <button onclick="app.setup()" style="width: 100%;">Create Account</button>
-        <button onclick="app.showLogin()" class="secondary" style="width: 100%; margin-top: 10px;">Back</button>
-        <div id="setupError" class="error" style="text-align: center; margin-top: 10px;"></div>
-      </div>
 
-      <div style="text-align: center; margin-top: 20px;">
-        <button onclick="app.showSetup()" class="secondary" style="width: 100%;">Create New Account</button>
-      </div>
     </div>
   </div>
 
@@ -134,6 +113,7 @@
         <button class="nav-btn" onclick="app.section('athletes', this)">Athletes</button>
         <button class="nav-btn" onclick="app.section('assessments', this)">Assessments</button>
         <button class="nav-btn" onclick="app.section('history', this)">History</button>
+        <button class="nav-btn" onclick="app.section('coaches', this)">Manage Coaches</button>
       </nav>
 
       <!-- Dashboard -->
@@ -299,6 +279,36 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Coaches -->
+      <div id="coaches" class="section">
+        <h2>Manage Coaches</h2>
+        <div class="form-box">
+          <h3>Add New Coach</h3>
+          <div class="form-group">
+            <label>Coach Name</label>
+            <input type="text" id="newCoachName" placeholder="Coach name">
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="newCoachPassword" placeholder="Password (min 6 chars)">
+          </div>
+          <button onclick="app.addCoach()" style="width: 100%;">Add Coach</button>
+          <div id="coachMsg"></div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Coach Name</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="coachesBody">
+            <tr><td colspan="2" class="empty">No coaches yet</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -350,38 +360,6 @@
         }
       },
 
-      showLogin() {
-        document.getElementById('loginScreen').classList.remove('hidden');
-        document.getElementById('appScreen').classList.add('hidden');
-        document.getElementById('loginForm').classList.remove('hidden');
-        document.getElementById('setupForm').classList.add('hidden');
-      },
-
-      showSetup() {
-        document.getElementById('loginForm').classList.add('hidden');
-        document.getElementById('setupForm').classList.remove('hidden');
-      },
-
-      setup() {
-        const name = document.getElementById('setupName').value.trim();
-        const pass1 = document.getElementById('setupPassword').value;
-        const pass2 = document.getElementById('setupPassword2').value;
-        const err = document.getElementById('setupError');
-
-        if (!name) { err.textContent = 'Enter name'; return; }
-        if (pass1.length < 6) { err.textContent = 'Password must be at least 6 characters'; return; }
-        if (pass1 !== pass2) { err.textContent = 'Passwords do not match'; return; }
-
-        const coaches = JSON.parse(localStorage.getItem('peakCoaches') || '{}');
-        if (coaches[name]) { err.textContent = 'Coach already exists'; return; }
-
-        coaches[name] = { password: pass1 };
-        localStorage.setItem('peakCoaches', JSON.stringify(coaches));
-        localStorage.setItem('peakCurrentCoach', name);
-        this.currentCoach = name;
-        this.showApp();
-      },
-
       login() {
         const name = document.getElementById('coachName').value.trim();
         const pass = document.getElementById('password').value;
@@ -404,12 +382,13 @@
         this.currentCoach = null;
         document.getElementById('coachName').value = '';
         document.getElementById('password').value = '';
-        document.getElementById('setupName').value = '';
-        document.getElementById('setupPassword').value = '';
-        document.getElementById('setupPassword2').value = '';
         document.getElementById('loginError').textContent = '';
-        document.getElementById('setupError').textContent = '';
         this.showLogin();
+      },
+
+      showLogin() {
+        document.getElementById('loginScreen').classList.remove('hidden');
+        document.getElementById('appScreen').classList.add('hidden');
       },
 
       showApp() {
@@ -430,6 +409,7 @@
         this.renderAthletes();
         this.renderLeaderboard();
         this.renderHistory();
+        this.renderCoaches();
         this.updateStats();
       },
 
@@ -438,6 +418,7 @@
           this.renderAthletes();
           this.renderLeaderboard();
           this.renderHistory();
+          this.renderCoaches();
           this.updateStats();
         }
       },
@@ -709,6 +690,51 @@
             </tr>
           `).join('');
         }
+      },
+
+      addCoach() {
+        const name = document.getElementById('newCoachName').value.trim();
+        const pass = document.getElementById('newCoachPassword').value;
+        const msg = document.getElementById('coachMsg');
+
+        if (!name) { msg.innerHTML = '<span class="error">Enter coach name</span>'; return; }
+        if (pass.length < 6) { msg.innerHTML = '<span class="error">Password must be at least 6 characters</span>'; return; }
+
+        const coaches = JSON.parse(localStorage.getItem('peakCoaches') || '{}');
+        if (coaches[name]) { msg.innerHTML = '<span class="error">Coach already exists</span>'; return; }
+
+        coaches[name] = { password: pass };
+        localStorage.setItem('peakCoaches', JSON.stringify(coaches));
+        document.getElementById('newCoachName').value = '';
+        document.getElementById('newCoachPassword').value = '';
+        msg.innerHTML = '<span class="success">Coach added successfully!</span>';
+        this.renderCoaches();
+      },
+
+      deleteCoach(name) {
+        if (!confirm('Delete coach "' + name + '"?')) return;
+        const coaches = JSON.parse(localStorage.getItem('peakCoaches') || '{}');
+        delete coaches[name];
+        localStorage.setItem('peakCoaches', JSON.stringify(coaches));
+        this.renderCoaches();
+      },
+
+      renderCoaches() {
+        const coaches = JSON.parse(localStorage.getItem('peakCoaches') || '{}');
+        const tbody = document.getElementById('coachesBody');
+        const coachNames = Object.keys(coaches);
+
+        if (coachNames.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="2" class="empty">No coaches yet</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = coachNames.map(name => `
+          <tr>
+            <td>${name}</td>
+            <td><button onclick="app.deleteCoach('${name}')" class="danger" style="width: auto; padding: 6px 12px; font-size: 12px;">Delete</button></td>
+          </tr>
+        `).join('');
       }
     };
 
