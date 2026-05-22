@@ -170,11 +170,11 @@
           <h3>Add Athlete</h3>
           <div class="form-group">
             <label>Athlete Name</label>
-            <input type="text" id="athleteName" placeholder="Name">
+            <input type="text" id="newAthleteNameInput" placeholder="Name">
           </div>
           <div class="form-group">
             <label>Program</label>
-            <select id="athleteProgram">
+            <select id="newAthleteProgramInput">
               <option>Elementary School (Grades 1-5)</option>
               <option>Middle School (Grades 6-8)</option>
               <option>High School (Grades 9-12)</option>
@@ -602,8 +602,8 @@
       },
 
       async addAthlete() {
-        const name = document.getElementById('athleteName').value.trim();
-        const program = document.getElementById('athleteProgram').value;
+        const name = document.getElementById('newAthleteNameInput').value.trim();
+        const program = document.getElementById('newAthleteProgramInput').value;
         const msg = document.getElementById('athleteMsg');
 
         if (!name) { msg.innerHTML = '<span class="error">Enter athlete name</span>'; return; }
@@ -618,7 +618,7 @@
           });
 
           if (res.ok) {
-            document.getElementById('athleteName').value = '';
+            document.getElementById('newAthleteNameInput').value = '';
             msg.innerHTML = `<span class="success">Athlete added! Access Code: <strong>${code}</strong></span>`;
             this.loadAthletes();
             this.renderAthletes();
