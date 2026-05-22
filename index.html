@@ -283,13 +283,12 @@
         <table>
           <thead>
             <tr>
-              <th>ID</th>
               <th>Metric Name</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody id="metricsBody">
-            <tr><td colspan="3" class="empty">Loading metrics...</td></tr>
+            <tr><td colspan="2" class="empty">Loading metrics...</td></tr>
           </tbody>
         </table>
       </div>
@@ -893,11 +892,10 @@
           const tbody = document.getElementById('metricsBody');
 
           if (metrics.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="3" class="empty">No metrics yet</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="2" class="empty">No metrics yet</td></tr>';
           } else {
             tbody.innerHTML = metrics.map(m => `
               <tr>
-                <td><strong>${m.id}</strong></td>
                 <td>${m.name}</td>
                 <td><button onclick="app.deleteMetric(${m.id})" class="danger" style="width: auto; padding: 6px 12px; font-size: 12px;">Delete</button></td>
               </tr>
