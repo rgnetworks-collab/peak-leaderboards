@@ -113,6 +113,7 @@
         <button class="nav-btn" onclick="app.section('athletes', this)">Athletes</button>
         <button class="nav-btn" onclick="app.section('assessments', this)">Assessments</button>
         <button class="nav-btn" onclick="app.section('history', this)">History</button>
+        <button class="nav-btn" onclick="app.section('metrics', this)">Manage Metrics</button>
         <button class="nav-btn" onclick="app.section('coaches', this)">Manage Coaches</button>
       </nav>
 
@@ -298,6 +299,33 @@
         </table>
       </div>
 
+      <!-- Metrics -->
+      <div id="metrics" class="section">
+        <h2>Manage Metrics</h2>
+        <div class="form-box">
+          <h3>Add New Metric</h3>
+          <div class="form-group">
+            <label>Metric Name</label>
+            <input type="text" id="newMetricName" placeholder="e.g., Deadlift 1RM">
+          </div>
+          <button onclick="app.addMetric()" style="width: 100%;">Add Metric</button>
+          <div id="metricMsg"></div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Metric Name</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="metricsBody">
+            <tr><td colspan="3" class="empty">Loading metrics...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
       <!-- Coaches -->
       <div id="coaches" class="section">
         <h2>Manage Coaches</h2>
@@ -424,22 +452,26 @@
       },
 
       loadData() {
+        this.renderMetrics();
         this.renderAthletes();
         this.renderLeaderboard();
         this.renderHistory();
         this.renderAssessments();
         this.renderCoaches();
         this.updateStats();
+        this.updateMetricSelects();
       },
 
       refresh() {
         if (this.currentCoach) {
+          this.renderMetrics();
           this.renderAthletes();
           this.renderLeaderboard();
           this.renderHistory();
           this.renderAssessments();
           this.renderCoaches();
           this.updateStats();
+          this.updateMetricSelects();
         }
       },
 
@@ -600,6 +632,7 @@
       renderAssessments() {
         const assessments = this.getAssessments();
         const athletes = this.getAthletes();
+        const metrics = this.getMetrics();
         const tbody = document.getElementById('assessmentsTableBody');
 
         if (assessments.length === 0) {
@@ -612,7 +645,7 @@
         tbody.innerHTML = sorted.map(a => {
           const athlete = athletes.find(ath => ath.id === a.athleteId);
           const date = new Date(a.recordedAt).toLocaleDateString();
-          const metric = metricNames[a.metricId] || a.metricId;
+          const metric = metrics[a.metricId] || a.metricId;
           
           return `
             <tr>
@@ -669,6 +702,7 @@
       renderHistory() {
         const assessments = this.getAssessments();
         const athletes = this.getAthletes();
+        const metrics = this.getMetrics();
         const tbody = document.getElementById('historyBody');
 
         if (assessments.length === 0) {
@@ -681,7 +715,7 @@
         tbody.innerHTML = sorted.map(a => {
           const athlete = athletes.find(ath => ath.id === a.athleteId);
           const date = new Date(a.recordedAt).toLocaleDateString();
-          const metric = metricNames[a.metricId] || a.metricId;
+          const metric = metrics[a.metricId] || a.metricId;
           
           return `
             <tr>
@@ -809,7 +843,80 @@
         this.renderCoaches();
       },
 
-      renderCoaches() {
+      addMetric() {
+        const name = document.getElementById('newMetricName').value.trim();
+        const msg = document.getElementById('metricMsg');
+
+        if (!name) { msg.innerHTML = '<span class="error">Enter metric name</span>'; return; }
+
+        const metrics = this.getMetrics();
+        const newId = Math.max(...Object.keys(metrics).map(k => parseInt(k)), 0) + 1;
+        
+        metrics[newId] = name;
+        localStorage.setItem('peakMetrics', JSON.stringify(metrics));
+        document.getElementById('newMetricName').value = '';
+        msg.innerHTML = '<span class="success">Metric added!</span>';
+        this.renderMetrics();
+        this.updateMetricSelects();
+      },
+
+      deleteMetric(id) {
+        if (!confirm('Delete this metric?')) return;
+        const metrics = this.getMetrics();
+        delete metrics[id];
+        localStorage.setItem('peakMetrics', JSON.stringify(metrics));
+        this.renderMetrics();
+        this.updateMetricSelects();
+      },
+
+      renderMetrics() {
+        const metrics = this.getMetrics();
+        const tbody = document.getElementById('metricsBody');
+        const metricIds = Object.keys(metrics).sort((a, b) => parseInt(a) - parseInt(b));
+
+        if (metricIds.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="3" class="empty">No metrics yet</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = metricIds.map(id => `
+          <tr>
+            <td><strong>${id}</strong></td>
+            <td>${metrics[id]}</td>
+            <td><button onclick="app.deleteMetric(${id})" class="danger" style="width: auto; padding: 6px 12px; font-size: 12px;">Delete</button></td>
+          </tr>
+        `).join('');
+      },
+
+      getMetrics() {
+        const stored = localStorage.getItem('peakMetrics');
+        if (stored) return JSON.parse(stored);
+        
+        // Default metrics if none exist
+        const defaults = {
+          '1': 'Hand Grip Test', '2': 'Bar Hang', '3': 'Pull-Ups (60 sec)',
+          '4': 'Push-Ups (60 sec)', '5': 'Trap Bar Deadlift 1RM', '6': 'Plank Time',
+          '7': 'Bike RPM', '8': 'Squat 1RM', '9': 'Bench Press 1RM',
+          '10': 'Vertical Jump', '11': 'Row 500M'
+        };
+        localStorage.setItem('peakMetrics', JSON.stringify(defaults));
+        return defaults;
+      },
+
+      updateMetricSelects() {
+        const metrics = this.getMetrics();
+        const metricSelects = ['metricSelect', 'assMetric', 'athleteMetricSelect'];
+        
+        metricSelects.forEach(selectId => {
+          const select = document.getElementById(selectId);
+          if (select) {
+            const current = select.value;
+            select.innerHTML = '<option value="">Select metric...</option>' + 
+              Object.entries(metrics).map(([id, name]) => `<option value="${id}">${name}</option>`).join('');
+            select.value = current;
+          }
+        });
+      },
         const coaches = JSON.parse(localStorage.getItem('peakCoaches') || '{}');
         const tbody = document.getElementById('coachesBody');
         const coachNames = Object.keys(coaches);
