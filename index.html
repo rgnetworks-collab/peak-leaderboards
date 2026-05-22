@@ -6,77 +6,177 @@
   <title>PEAK Leaderboards</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; }
+    
+    :root {
+      --primary: #F54A05;
+      --dark-bg: #0F0F0F;
+      --dark-surface: #1A1A1A;
+      --dark-border: #2D2D2D;
+      --dark-text: #E0E0E0;
+      --dark-text-secondary: #A0A0A0;
+    }
+    
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      background: var(--dark-bg); 
+      color: var(--dark-text);
+    }
     
     .hidden { display: none !important; }
     
-    header { background: white; padding: 20px; border-bottom: 1px solid #ddd; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    header { 
+      background: var(--dark-surface); 
+      padding: 20px; 
+      border-bottom: 1px solid var(--dark-border); 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4); 
+    }
     .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-    h1 { color: #0066cc; font-size: 28px; }
+    h1 { color: var(--primary); font-size: 28px; font-weight: 700; }
     .header-flex { display: flex; justify-content: space-between; align-items: center; }
-    .user-info { display: flex; align-items: center; gap: 15px; font-size: 14px; }
+    .user-info { display: flex; align-items: center; gap: 15px; font-size: 14px; color: var(--dark-text-secondary); }
     
-    .login-container { max-width: 400px; margin: 60px auto; padding: 40px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .login-container { max-width: 400px; margin: 60px auto; padding: 40px; background: var(--dark-surface); border-radius: 12px; border: 1px solid var(--dark-border); box-shadow: 0 8px 32px rgba(0,0,0,0.6); }
     .login-container h1 { text-align: center; margin-bottom: 30px; }
     
     .form-group { margin: 15px 0; }
-    label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
-    input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; font-family: inherit; }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: #0066cc; box-shadow: 0 0 0 3px rgba(0,102,204,0.1); }
+    label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 14px; color: var(--dark-text); }
+    input, select, textarea { 
+      width: 100%; 
+      padding: 10px; 
+      border: 1px solid var(--dark-border); 
+      border-radius: 6px; 
+      font-size: 14px; 
+      font-family: inherit;
+      background: var(--dark-bg);
+      color: var(--dark-text);
+    }
+    input:focus, select:focus, textarea:focus { 
+      outline: none; 
+      border-color: var(--primary); 
+      box-shadow: 0 0 0 3px rgba(245, 74, 5, 0.2);
+    }
     
-    button { padding: 10px 20px; background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; }
-    button:hover { background: #0052a3; }
-    button.danger { background: #ff4444; }
-    button.danger:hover { background: #cc0000; }
-    button.secondary { background: #666; }
-    button.secondary:hover { background: #555; }
+    button { 
+      padding: 10px 20px; 
+      background: var(--primary); 
+      color: white; 
+      border: none; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      font-weight: 600; 
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+    button:hover { background: #E63D00; }
+    button.danger { background: #D32F2F; }
+    button.danger:hover { background: #B71C1C; }
+    button.secondary { background: var(--dark-border); color: var(--dark-text); }
+    button.secondary:hover { background: #3D3D3D; }
     
-    .error { color: red; font-size: 12px; margin-top: 5px; }
-    .success { color: green; font-size: 12px; margin-top: 5px; }
+    .error { color: #FF6B6B; font-size: 12px; margin-top: 5px; }
+    .success { color: #51CF66; font-size: 12px; margin-top: 5px; }
     
-    nav { display: flex; gap: 10px; margin: 20px 0; border-bottom: 1px solid #ddd; padding-bottom: 0; }
-    nav button { margin: 0; display: inline-block; width: auto; border-radius: 0; border-bottom: 3px solid transparent; padding: 15px 20px; background: white; color: #333; }
-    nav button.active { border-bottom-color: #0066cc; color: #0066cc; }
+    nav { display: flex; gap: 10px; margin: 20px 0; border-bottom: 1px solid var(--dark-border); padding-bottom: 0; }
+    nav button { 
+      margin: 0; 
+      display: inline-block; 
+      width: auto; 
+      border-radius: 0; 
+      border-bottom: 3px solid transparent; 
+      padding: 15px 20px; 
+      background: transparent; 
+      color: var(--dark-text-secondary);
+      transition: all 0.2s ease;
+    }
+    nav button:hover { color: var(--primary); }
+    nav button.active { border-bottom-color: var(--primary); color: var(--primary); }
     
     .section { display: none; }
     .section.active { display: block; }
     
-    h2 { margin: 30px 0 20px 0; font-size: 24px; }
-    h3 { margin: 20px 0 15px 0; font-size: 18px; }
+    h2 { margin: 30px 0 20px 0; font-size: 24px; color: var(--dark-text); }
+    h3 { margin: 20px 0 15px 0; font-size: 18px; color: var(--dark-text); }
     
-    table { width: 100%; border-collapse: collapse; background: white; margin: 20px 0; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-    th { background: #f0f0f0; font-weight: bold; }
-    tr:hover { background: #f9f9f9; }
+    table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      background: var(--dark-surface); 
+      margin: 20px 0; 
+      border-radius: 8px; 
+      overflow: hidden; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      border: 1px solid var(--dark-border);
+    }
+    th, td { 
+      padding: 12px; 
+      text-align: left; 
+      border-bottom: 1px solid var(--dark-border); 
+      color: var(--dark-text);
+    }
+    th { background: var(--dark-bg); font-weight: 600; color: var(--primary); }
+    tr:hover { background: #252525; }
     
-    .filter-box { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .form-box { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .filter-box { 
+      background: var(--dark-surface); 
+      padding: 20px; 
+      border-radius: 8px; 
+      margin-bottom: 20px; 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 20px; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      border: 1px solid var(--dark-border);
+    }
+    .form-box { 
+      background: var(--dark-surface); 
+      padding: 20px; 
+      border-radius: 8px; 
+      margin-bottom: 20px; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      border: 1px solid var(--dark-border);
+    }
     
-    .empty { text-align: center; color: #999; padding: 40px; }
+    .empty { text-align: center; color: var(--dark-text-secondary); padding: 40px; }
     
     .action-buttons { display: flex; gap: 5px; }
     .action-buttons button { padding: 4px 8px; font-size: 12px; width: auto; margin: 0; }
     
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; }
     .modal.active { display: flex; align-items: center; justify-content: center; }
-    .modal-content { background: white; padding: 40px; border-radius: 8px; max-width: 500px; width: 90%; }
+    .modal-content { background: var(--dark-surface); padding: 40px; border-radius: 12px; max-width: 500px; width: 90%; border: 1px solid var(--dark-border); }
     .modal-content h2 { margin-top: 0; }
     
-    .stats { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .stats { 
+      background: var(--dark-surface); 
+      padding: 20px; 
+      border-radius: 8px; 
+      margin-bottom: 20px; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      border: 1px solid var(--dark-border);
+    }
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 10px; }
     .stat-item { text-align: center; }
-    .stat-value { font-size: 24px; font-weight: bold; color: #0066cc; }
-    .stat-label { font-size: 12px; color: #666; }
+    .stat-value { font-size: 24px; font-weight: bold; color: var(--primary); }
+    .stat-label { font-size: 12px; color: var(--dark-text-secondary); }
+    
+    p { color: var(--dark-text); }
   </style>
 </head>
 <body>
   <!-- LOGIN SCREEN -->
   <div id="loginScreen">
     <div class="login-container">
-      <h1>PEAK</h1>
-      <p style="text-align: center; color: #666; margin-bottom: 30px;">Leaderboards</p>
+      <img src="logo.png" alt="PEAK" style="height: 60px; width: 60px; border-radius: 50%; margin: 0 auto 20px; display: block;"/>
+      <h1 style="text-align: center; margin-bottom: 5px;">PEAK</h1>
+      <p style="text-align: center; color: var(--dark-text-secondary); margin-bottom: 30px;">Leaderboards</p>
       
-      <div id="loginForm">
+      <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <button onclick="app.showCoachLogin()" id="coachLoginTab" style="flex: 1; background: var(--primary); color: white;">Coach</button>
+        <button onclick="app.showAthleteLogin()" id="athleteLoginTab" style="flex: 1; background: var(--dark-border); color: var(--dark-text);">Athlete</button>
+      </div>
+
+      <!-- Coach Login -->
+      <div id="coachLoginForm">
         <div class="form-group">
           <label>Coach Name</label>
           <input type="text" id="coachName" placeholder="Your name">
@@ -89,27 +189,18 @@
         <div id="loginError" class="error" style="text-align: center; margin-top: 10px;"></div>
       </div>
 
-      <div id="setupForm" class="hidden">
-        <p style="text-align: center; margin-bottom: 20px; color: #666;">First time? Set your password</p>
+      <!-- Athlete Login -->
+      <div id="athleteLoginForm" class="hidden">
         <div class="form-group">
-          <label>Coach Name</label>
-          <input type="text" id="setupName" placeholder="Your name">
+          <label>Athlete Name</label>
+          <input type="text" id="athleteName" placeholder="Your name">
         </div>
         <div class="form-group">
-          <label>Create Password</label>
-          <input type="password" id="setupPassword" placeholder="Password (min 6 chars)">
+          <label>Access Code</label>
+          <input type="text" id="athleteCode" placeholder="Access code (ask coach)">
         </div>
-        <div class="form-group">
-          <label>Confirm Password</label>
-          <input type="password" id="setupPassword2" placeholder="Confirm password">
-        </div>
-        <button onclick="app.setup()" style="width: 100%;">Create Account</button>
-        <button onclick="app.showLogin()" class="secondary" style="width: 100%; margin-top: 10px;">Back</button>
-        <div id="setupError" class="error" style="text-align: center; margin-top: 10px;"></div>
-      </div>
-
-      <div style="text-align: center; margin-top: 20px;">
-        <button onclick="app.showSetup()" class="secondary" style="width: 100%;">Create New Account</button>
+        <button onclick="app.athleteLogin()" style="width: 100%;">View Leaderboard</button>
+        <div id="athleteLoginError" class="error" style="text-align: center; margin-top: 10px;"></div>
       </div>
     </div>
   </div>
@@ -119,7 +210,10 @@
     <header>
       <div class="container">
         <div class="header-flex">
-          <h1>PEAK Leaderboards</h1>
+          <div style="display: flex; align-items: center; gap: 15px;">
+            <img src="logo.png" alt="PEAK" style="height: 40px; width: 40px; border-radius: 50%;"/>
+            <h1 style="margin: 0;">PEAK Leaderboards</h1>
+          </div>
           <div class="user-info">
             <span id="coachDisplay"></span>
             <button onclick="app.logout()" style="width: auto;">Logout</button>
@@ -134,6 +228,7 @@
         <button class="nav-btn" onclick="app.section('athletes', this)">Athletes</button>
         <button class="nav-btn" onclick="app.section('assessments', this)">Assessments</button>
         <button class="nav-btn" onclick="app.section('history', this)">History</button>
+        <button class="nav-btn" onclick="app.section('coaches', this)">Manage Coaches</button>
       </nav>
 
       <!-- Dashboard -->
@@ -223,7 +318,7 @@
 
         <div class="form-box">
           <h3>Import Athletes (CSV)</h3>
-          <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Format: name, program (one per line)</p>
+          <p style="font-size: 12px; color: var(--dark-text-secondary); margin-bottom: 10px;">Format: name, program (one per line)</p>
           <textarea id="csvInput" placeholder="John Doe, High School (Grades 9-12)&#10;Jane Smith, College" style="height: 150px;"></textarea>
           <button onclick="app.importCSV()" style="width: 100%; margin-top: 10px;">Import Athletes</button>
           <div id="importMsg"></div>
@@ -235,11 +330,12 @@
               <th>Name</th>
               <th>Program</th>
               <th>Assessments</th>
+              <th>Access Code</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody id="athletesBody">
-            <tr><td colspan="4" class="empty">No athletes yet</td></tr>
+            <tr><td colspan="5" class="empty">No athletes yet</td></tr>
           </tbody>
         </table>
       </div>
@@ -299,11 +395,104 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Coaches -->
+      <div id="coaches" class="section">
+        <h2>Manage Coaches</h2>
+        <div class="form-box">
+          <h3>Add New Coach</h3>
+          <div class="form-group">
+            <label>Coach Name</label>
+            <input type="text" id="newCoachName" placeholder="Coach name">
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="newCoachPassword" placeholder="Password (min 6 chars)">
+          </div>
+          <button onclick="app.addCoach()" style="width: 100%;">Add Coach</button>
+          <div id="coachMsg"></div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="coachesBody">
+            <tr><td colspan="2" class="empty">No coaches yet</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- Edit Modal -->
-  <div id="editModal" class="modal">
+  <!-- ATHLETE SCREEN (Read-Only) -->
+  <div id="athleteScreen" class="hidden">
+    <header>
+      <div class="container">
+        <div class="header-flex">
+          <div style="display: flex; align-items: center; gap: 15px;">
+            <img src="logo.png" alt="PEAK" style="height: 40px; width: 40px; border-radius: 50%;"/>
+            <h1 style="margin: 0;">PEAK Leaderboards</h1>
+          </div>
+          <div class="user-info">
+            <span id="athleteDisplay"></span>
+            <button onclick="app.logout()" style="width: auto;">Logout</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="container">
+      <h2 style="margin-top: 40px;">Leaderboards</h2>
+      <div class="filter-box">
+        <div>
+          <label>Assessment</label>
+          <select id="athleteMetricSelect" onchange="app.renderAthleteLeaderboard()">
+            <option value="">Select metric...</option>
+            <option value="1">Hand Grip Test</option>
+            <option value="2">Bar Hang</option>
+            <option value="3">Pull-Ups (60 sec)</option>
+            <option value="4">Push-Ups (60 sec)</option>
+            <option value="5">Trap Bar Deadlift 1RM</option>
+            <option value="6">Plank Time</option>
+            <option value="7">Bike RPM</option>
+            <option value="8">Squat 1RM</option>
+            <option value="9">Bench Press 1RM</option>
+            <option value="10">Vertical Jump</option>
+            <option value="11">Row 500M</option>
+          </select>
+        </div>
+        <div>
+          <label>Program</label>
+          <select id="athleteProgramSelect" onchange="app.renderAthleteLeaderboard()">
+            <option value="">All Programs</option>
+            <option value="Elementary School (Grades 1-5)">Elementary School (Grades 1-5)</option>
+            <option value="Middle School (Grades 6-8)">Middle School (Grades 6-8)</option>
+            <option value="High School (Grades 9-12)">High School (Grades 9-12)</option>
+            <option value="College">College</option>
+            <option value="Adult">Adult</option>
+          </select>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Athlete</th>
+            <th>Program</th>
+            <th style="text-align: right;">Score</th>
+          </tr>
+        </thead>
+        <tbody id="athleteLeaderboardBody">
+          <tr><td colspan="4" class="empty">Select a metric to view leaderboard</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
     <div class="modal-content">
       <h2>Edit Assessment</h2>
       <div class="form-group">
@@ -332,19 +521,23 @@
 
     const app = {
       currentCoach: null,
+      currentAthlete: null,
       editingId: null,
 
       init() {
-        this.loadCoach();
+        this.loadUser();
         window.addEventListener('storage', () => this.refresh());
       },
 
-      loadCoach() {
+      loadUser() {
         const coaches = JSON.parse(localStorage.getItem('peakCoaches') || '{}');
         this.currentCoach = localStorage.getItem('peakCurrentCoach');
+        this.currentAthlete = localStorage.getItem('peakCurrentAthlete');
         
         if (this.currentCoach && coaches[this.currentCoach]) {
           this.showApp();
+        } else if (this.currentAthlete) {
+          this.showAthleteApp();
         } else {
           this.showLogin();
         }
@@ -353,33 +546,22 @@
       showLogin() {
         document.getElementById('loginScreen').classList.remove('hidden');
         document.getElementById('appScreen').classList.add('hidden');
-        document.getElementById('loginForm').classList.remove('hidden');
-        document.getElementById('setupForm').classList.add('hidden');
+        document.getElementById('athleteScreen').classList.add('hidden');
+        this.showCoachLogin();
       },
 
-      showSetup() {
-        document.getElementById('loginForm').classList.add('hidden');
-        document.getElementById('setupForm').classList.remove('hidden');
+      showCoachLogin() {
+        document.getElementById('coachLoginForm').classList.remove('hidden');
+        document.getElementById('athleteLoginForm').classList.add('hidden');
+        document.getElementById('coachLoginTab').style.background = 'var(--primary)';
+        document.getElementById('athleteLoginTab').style.background = 'var(--dark-border)';
       },
 
-      setup() {
-        const name = document.getElementById('setupName').value.trim();
-        const pass1 = document.getElementById('setupPassword').value;
-        const pass2 = document.getElementById('setupPassword2').value;
-        const err = document.getElementById('setupError');
-
-        if (!name) { err.textContent = 'Enter name'; return; }
-        if (pass1.length < 6) { err.textContent = 'Password must be at least 6 characters'; return; }
-        if (pass1 !== pass2) { err.textContent = 'Passwords do not match'; return; }
-
-        const coaches = JSON.parse(localStorage.getItem('peakCoaches') || '{}');
-        if (coaches[name]) { err.textContent = 'Coach already exists'; return; }
-
-        coaches[name] = { password: pass1 };
-        localStorage.setItem('peakCoaches', JSON.stringify(coaches));
-        localStorage.setItem('peakCurrentCoach', name);
-        this.currentCoach = name;
-        this.showApp();
+      showAthleteLogin() {
+        document.getElementById('coachLoginForm').classList.add('hidden');
+        document.getElementById('athleteLoginForm').classList.remove('hidden');
+        document.getElementById('athleteLoginTab').style.background = 'var(--primary)';
+        document.getElementById('coachLoginTab').style.background = 'var(--dark-border)';
       },
 
       login() {
@@ -395,28 +577,60 @@
         if (coaches[name].password !== pass) { err.textContent = 'Wrong password'; return; }
 
         localStorage.setItem('peakCurrentCoach', name);
+        localStorage.removeItem('peakCurrentAthlete');
         this.currentCoach = name;
+        this.currentAthlete = null;
         this.showApp();
+      },
+
+      athleteLogin() {
+        const name = document.getElementById('athleteName').value.trim();
+        const code = document.getElementById('athleteCode').value.trim();
+        const err = document.getElementById('athleteLoginError');
+
+        if (!name) { err.textContent = 'Enter your name'; return; }
+        if (!code) { err.textContent = 'Enter access code'; return; }
+
+        const athletes = JSON.parse(localStorage.getItem('peakAthletes') || '[]');
+        const athleteExists = athletes.find(a => a.name.toLowerCase() === name.toLowerCase() && a.code === code);
+
+        if (!athleteExists) { err.textContent = 'Invalid name or access code'; return; }
+
+        localStorage.setItem('peakCurrentAthlete', name);
+        localStorage.removeItem('peakCurrentCoach');
+        this.currentAthlete = name;
+        this.currentCoach = null;
+        this.showAthleteApp();
       },
 
       logout() {
         localStorage.removeItem('peakCurrentCoach');
+        localStorage.removeItem('peakCurrentAthlete');
         this.currentCoach = null;
+        this.currentAthlete = null;
         document.getElementById('coachName').value = '';
         document.getElementById('password').value = '';
-        document.getElementById('setupName').value = '';
-        document.getElementById('setupPassword').value = '';
-        document.getElementById('setupPassword2').value = '';
+        document.getElementById('athleteName').value = '';
+        document.getElementById('athleteCode').value = '';
         document.getElementById('loginError').textContent = '';
-        document.getElementById('setupError').textContent = '';
+        document.getElementById('athleteLoginError').textContent = '';
         this.showLogin();
       },
 
       showApp() {
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('appScreen').classList.remove('hidden');
+        document.getElementById('athleteScreen').classList.add('hidden');
         document.getElementById('coachDisplay').textContent = this.currentCoach;
         this.loadData();
+      },
+
+      showAthleteApp() {
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('appScreen').classList.add('hidden');
+        document.getElementById('athleteScreen').classList.remove('hidden');
+        document.getElementById('athleteDisplay').textContent = this.currentAthlete;
+        this.renderAthleteLeaderboard();
       },
 
       section(name, btn) {
@@ -481,16 +695,18 @@
         }
 
         const athletes = this.getAthletes();
+        const code = Math.random().toString(36).substring(2, 8).toUpperCase();
         athletes.push({
           id: Date.now(),
           name,
           program,
+          code,
           createdAt: new Date().toISOString()
         });
 
         this.saveAthletes(athletes);
         document.getElementById('athleteName').value = '';
-        msg.innerHTML = '<span class="success">Athlete added!</span>';
+        msg.innerHTML = `<span class="success">Athlete added! Access Code: <strong>${code}</strong></span>`;
       },
 
       importCSV() {
@@ -559,6 +775,7 @@
                 <td>${a.name}</td>
                 <td>${a.program}</td>
                 <td>${count}</td>
+                <td style="font-size: 12px; color: var(--dark-text-secondary);">Code: <strong>${a.code || 'N/A'}</strong></td>
                 <td><button onclick="app.deleteAthlete(${a.id})" class="danger" style="width: auto; padding: 6px 12px; font-size: 12px;">Delete</button></td>
               </tr>
             `;
@@ -621,7 +838,7 @@
               <td>${a.recordedBy}</td>
               <td>
                 <div class="action-buttons">
-                  <button onclick="app.editAssessment(${a.id}, ${a.value})" style="background: #0066cc;">Edit</button>
+                  <button onclick="app.editAssessment(${a.id}, ${a.value})" style="background: var(--primary);">Edit</button>
                   <button onclick="app.deleteAssessment(${a.id})" class="danger">Delete</button>
                 </div>
               </td>
@@ -705,7 +922,109 @@
               <td><strong>#${i + 1}</strong></td>
               <td>${r.athlete.name}</td>
               <td>${r.athlete.program}</td>
-              <td style="text-align: right; font-weight: bold;">${r.score}</td>
+              <td style="text-align: right; font-weight: bold; color: var(--primary);">${r.score}</td>
+            </tr>
+          `).join('');
+        }
+      }
+    };
+
+      // Coach Management
+      addCoach() {
+        const name = document.getElementById('newCoachName').value.trim();
+        const pass = document.getElementById('newCoachPassword').value;
+        const msg = document.getElementById('coachMsg');
+
+        if (!name) { msg.innerHTML = '<span class="error">Enter coach name</span>'; return; }
+        if (pass.length < 6) { msg.innerHTML = '<span class="error">Password must be at least 6 characters</span>'; return; }
+
+        const coaches = JSON.parse(localStorage.getItem('peakCoaches') || '{}');
+        if (coaches[name]) { msg.innerHTML = '<span class="error">Coach already exists</span>'; return; }
+
+        coaches[name] = { password: pass };
+        localStorage.setItem('peakCoaches', JSON.stringify(coaches));
+        document.getElementById('newCoachName').value = '';
+        document.getElementById('newCoachPassword').value = '';
+        msg.innerHTML = '<span class="success">Coach added!</span>';
+        this.renderCoaches();
+      },
+
+      deleteCoach(name) {
+        if (!confirm('Delete this coach?')) return;
+        const coaches = JSON.parse(localStorage.getItem('peakCoaches') || '{}');
+        delete coaches[name];
+        localStorage.setItem('peakCoaches', JSON.stringify(coaches));
+        this.renderCoaches();
+      },
+
+      renderCoaches() {
+        const coaches = JSON.parse(localStorage.getItem('peakCoaches') || '{}');
+        const tbody = document.getElementById('coachesBody');
+        const coachList = Object.keys(coaches);
+
+        if (coachList.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="2" class="empty">No coaches yet</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = coachList.map(name => `
+          <tr>
+            <td>${name}</td>
+            <td><button onclick="app.deleteCoach('${name}')" class="danger" style="width: auto; padding: 6px 12px; font-size: 12px;">Delete</button></td>
+          </tr>
+        `).join('');
+      },
+
+      showAthleteApp() {
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('appScreen').classList.add('hidden');
+        document.getElementById('athleteScreen').classList.remove('hidden');
+        document.getElementById('athleteDisplay').textContent = this.currentAthlete;
+        this.renderAthleteLeaderboard();
+      },
+
+      renderAthleteLeaderboard() {
+        const metricId = document.getElementById('athleteMetricSelect').value;
+        const program = document.getElementById('athleteProgramSelect').value;
+
+        if (!metricId) {
+          document.getElementById('athleteLeaderboardBody').innerHTML = '<tr><td colspan="4" class="empty">Select a metric to view leaderboard</td></tr>';
+          return;
+        }
+
+        const athletes = this.getAthletes();
+        const assessments = this.getAssessments();
+
+        const relevant = assessments.filter(a => a.metricId === metricId);
+        const latest = {};
+
+        relevant.forEach(a => {
+          if (!latest[a.athleteId] || new Date(a.recordedAt) > new Date(latest[a.athleteId].recordedAt)) {
+            latest[a.athleteId] = a;
+          }
+        });
+
+        let ranked = Object.values(latest).map(a => ({
+          score: a.value,
+          athlete: athletes.find(ath => ath.id === a.athleteId)
+        })).filter(r => r.athlete);
+
+        if (program) {
+          ranked = ranked.filter(r => r.athlete.program === program);
+        }
+
+        ranked.sort((a, b) => b.score - a.score);
+
+        const tbody = document.getElementById('athleteLeaderboardBody');
+        if (ranked.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4" class="empty">No data for this metric</td></tr>';
+        } else {
+          tbody.innerHTML = ranked.map((r, i) => `
+            <tr>
+              <td><strong>#${i + 1}</strong></td>
+              <td>${r.athlete.name}</td>
+              <td>${r.athlete.program}</td>
+              <td style="text-align: right; font-weight: bold; color: var(--primary);">${r.score}</td>
             </tr>
           `).join('');
         }
