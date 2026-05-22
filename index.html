@@ -434,25 +434,29 @@
         if (!name || !pass) { err.textContent = 'Fill all fields'; return; }
 
         try {
-          const res = await fetch(`${SUPABASE_URL}/rest/v1/coaches?name=eq.${encodeURIComponent(name)}`, {
+          // Query ALL coaches (no filter) to avoid Supabase query issues
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/coaches`, {
             headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY }
           });
-          const coaches = await res.json();
+          const allCoaches = await res.json();
           
-          console.log('Coaches found:', coaches);
-          console.log('Password entered:', pass);
-          console.log('Password in DB:', coaches.length > 0 ? coaches[0].password : 'none');
+          console.log('All coaches:', allCoaches);
           
-          if (!coaches.length) {
+          // Find the coach by name in JavaScript
+          const coach = allCoaches.find(c => c.name.toLowerCase() === name.toLowerCase());
+          
+          if (!coach) {
             err.textContent = 'Coach not found: ' + name;
             return;
           }
           
-          if (coaches[0].password.trim() !== pass.trim()) {
-            err.textContent = 'Password mismatch. Expected: ' + coaches[0].password + ' Got: ' + pass;
+          // Compare passwords
+          if (coach.password !== pass) {
+            err.textContent = 'Invalid password for ' + name;
             return;
           }
 
+          // Success!
           localStorage.setItem('peakCurrentCoach', name);
           localStorage.removeItem('peakCurrentAthlete');
           this.currentCoach = name;
