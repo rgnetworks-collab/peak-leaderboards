@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PEAK Leaderboards</title>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; }
@@ -16,7 +14,7 @@
     .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
     h1 { color: #0066cc; font-size: 28px; }
     .header-flex { display: flex; justify-content: space-between; align-items: center; }
-    .user-info { display: flex; align-items: center; gap: 15px; }
+    .user-info { display: flex; align-items: center; gap: 15px; font-size: 14px; }
     
     .login-container { max-width: 400px; margin: 60px auto; padding: 40px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
     .login-container h1 { text-align: center; margin-bottom: 30px; }
@@ -35,7 +33,7 @@
     .success { color: green; font-size: 12px; margin-top: 5px; }
     
     nav { display: flex; gap: 10px; margin: 20px 0; border-bottom: 1px solid #ddd; padding-bottom: 0; }
-    nav button { margin: 0; display: inline-block; width: auto; border-radius: 0; border-bottom: 3px solid transparent; padding: 15px 20px; background: white; }
+    nav button { margin: 0; display: inline-block; width: auto; border-radius: 0; border-bottom: 3px solid transparent; padding: 15px 20px; background: white; color: #333; }
     nav button.active { border-bottom-color: #0066cc; color: #0066cc; }
     
     .section { display: none; }
@@ -51,7 +49,6 @@
     .filter-box { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
     .form-box { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
     
-    .loading { text-align: center; color: #999; padding: 20px; }
     .empty { text-align: center; color: #999; padding: 40px; }
   </style>
 </head>
@@ -66,16 +63,8 @@
         <label>Coach Name</label>
         <input type="text" id="coachName" placeholder="Your name">
       </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="password" placeholder="Password">
-      </div>
-      <button onclick="handleLogin()" style="width: 100%;">Sign In</button>
+      <button onclick="app.login()" style="width: 100%;">Sign In</button>
       <div id="loginError" class="error" style="text-align: center; margin-top: 10px;"></div>
-      
-      <p style="text-align: center; margin-top: 20px; font-size: 12px; color: #999;">
-        Demo: Use any name + password "peak"
-      </p>
     </div>
   </div>
 
@@ -86,8 +75,8 @@
         <div class="header-flex">
           <h1>PEAK Leaderboards</h1>
           <div class="user-info">
-            <span id="coachNameDisplay" style="font-size: 14px;"></span>
-            <button onclick="handleLogout()" style="width: auto;">Logout</button>
+            <span id="coachDisplay"></span>
+            <button onclick="app.logout()" style="width: auto;">Logout</button>
           </div>
         </div>
       </div>
@@ -95,9 +84,9 @@
 
     <div class="container">
       <nav>
-        <button class="nav-btn active" onclick="switchSection('dashboard', this)">Dashboard</button>
-        <button class="nav-btn" onclick="switchSection('athletes', this)">Athletes</button>
-        <button class="nav-btn" onclick="switchSection('assessments', this)">Record Assessment</button>
+        <button class="nav-btn active" onclick="app.section('dashboard', this)">Dashboard</button>
+        <button class="nav-btn" onclick="app.section('athletes', this)">Athletes</button>
+        <button class="nav-btn" onclick="app.section('assessments', this)">Record Assessment</button>
       </nav>
 
       <!-- Dashboard -->
@@ -106,13 +95,24 @@
         <div class="filter-box">
           <div>
             <label>Assessment</label>
-            <select id="metricSelect" onchange="renderLeaderboard()">
+            <select id="metricSelect" onchange="app.renderLeaderboard()">
               <option value="">Select metric...</option>
+              <option value="1">Hand Grip Test</option>
+              <option value="2">Bar Hang</option>
+              <option value="3">Pull-Ups (60 sec)</option>
+              <option value="4">Push-Ups (60 sec)</option>
+              <option value="5">Trap Bar Deadlift 1RM</option>
+              <option value="6">Plank Time</option>
+              <option value="7">Bike RPM</option>
+              <option value="8">Squat 1RM</option>
+              <option value="9">Bench Press 1RM</option>
+              <option value="10">Vertical Jump</option>
+              <option value="11">Row 500M</option>
             </select>
           </div>
           <div>
             <label>Program</label>
-            <select id="programSelect" onchange="renderLeaderboard()">
+            <select id="programSelect" onchange="app.renderLeaderboard()">
               <option value="">All Programs</option>
               <option value="Elementary School (Grades 1-5)">Elementary School (Grades 1-5)</option>
               <option value="Middle School (Grades 6-8)">Middle School (Grades 6-8)</option>
@@ -133,7 +133,7 @@
             </tr>
           </thead>
           <tbody id="leaderboardBody">
-            <tr><td colspan="4" class="loading">Loading leaderboard...</td></tr>
+            <tr><td colspan="4" class="empty">Select a metric to view leaderboard</td></tr>
           </tbody>
         </table>
       </div>
@@ -156,7 +156,7 @@
               <option>Adult</option>
             </select>
           </div>
-          <button onclick="addAthlete()" style="width: 100%;">Add Athlete</button>
+          <button onclick="app.addAthlete()" style="width: 100%;">Add Athlete</button>
           <div id="athleteMsg"></div>
         </div>
 
@@ -169,7 +169,7 @@
             </tr>
           </thead>
           <tbody id="athletesBody">
-            <tr><td colspan="3" class="loading">Loading athletes...</td></tr>
+            <tr><td colspan="3" class="empty">No athletes yet</td></tr>
           </tbody>
         </table>
       </div>
@@ -188,13 +188,24 @@
             <label>Metric</label>
             <select id="assMetric">
               <option value="">Select metric...</option>
+              <option value="1">Hand Grip Test</option>
+              <option value="2">Bar Hang</option>
+              <option value="3">Pull-Ups (60 sec)</option>
+              <option value="4">Push-Ups (60 sec)</option>
+              <option value="5">Trap Bar Deadlift 1RM</option>
+              <option value="6">Plank Time</option>
+              <option value="7">Bike RPM</option>
+              <option value="8">Squat 1RM</option>
+              <option value="9">Bench Press 1RM</option>
+              <option value="10">Vertical Jump</option>
+              <option value="11">Row 500M</option>
             </select>
           </div>
           <div class="form-group">
             <label>Value</label>
             <input type="number" id="assValue" placeholder="e.g., 42" step="0.1">
           </div>
-          <button onclick="addAssessment()" style="width: 100%;">Record Assessment</button>
+          <button onclick="app.addAssessment()" style="width: 100%;">Record Assessment</button>
           <div id="assMsg"></div>
         </div>
       </div>
@@ -202,189 +213,180 @@
   </div>
 
   <script>
-    // Firebase Config
-    const firebaseConfig = {
-      apiKey: "AIzaSyDvH9zCdZXxJQzK7RqL8mN3pQrStUvWxYz",
-      authDomain: "peak-leaderboards.firebaseapp.com",
-      projectId: "peak-leaderboards",
-      databaseURL: "https://peak-leaderboards-default-rtdb.firebaseio.com",
-      storageBucket: "peak-leaderboards.appspot.com",
-      messagingSenderId: "551906768619",
-      appId: "1:551906768619:web:3f4d8c9e1a2b3c4d"
-    };
+    const app = {
+      currentCoach: null,
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+      init() {
+        this.loadCoach();
+        window.addEventListener('storage', () => this.refresh());
+      },
 
-    const GYM_ID = 'default_gym';
-    const metrics = [
-      { id: '1', display: 'Hand Grip Test' },
-      { id: '2', display: 'Bar Hang' },
-      { id: '3', display: 'Pull-Ups (60 sec)' },
-      { id: '4', display: 'Push-Ups (60 sec)' },
-      { id: '5', display: 'Trap Bar Deadlift 1RM' },
-      { id: '6', display: 'Plank Time' },
-      { id: '7', display: 'Bike RPM' },
-      { id: '8', display: 'Squat 1RM' },
-      { id: '9', display: 'Bench Press 1RM' },
-      { id: '10', display: 'Vertical Jump' },
-      { id: '11', display: 'Row 500M' }
-    ];
+      loadCoach() {
+        this.currentCoach = localStorage.getItem('peakCoach');
+        if (this.currentCoach) {
+          this.showApp();
+        } else {
+          this.showLogin();
+        }
+      },
 
-    let currentCoach = null;
+      login() {
+        const name = document.getElementById('coachName').value.trim();
+        if (!name) {
+          document.getElementById('loginError').textContent = 'Enter your name';
+          return;
+        }
+        localStorage.setItem('peakCoach', name);
+        this.currentCoach = name;
+        this.showApp();
+      },
 
-    function handleLogin() {
-      const name = document.getElementById('coachName').value.trim();
-      const password = document.getElementById('password').value;
+      logout() {
+        localStorage.removeItem('peakCoach');
+        this.currentCoach = null;
+        document.getElementById('coachName').value = '';
+        document.getElementById('loginError').textContent = '';
+        this.showLogin();
+      },
 
-      if (!name) {
-        document.getElementById('loginError').textContent = 'Enter your name';
-        return;
-      }
-      if (password !== 'peak') {
-        document.getElementById('loginError').textContent = 'Invalid password';
-        return;
-      }
+      showLogin() {
+        document.getElementById('loginScreen').classList.remove('hidden');
+        document.getElementById('appScreen').classList.add('hidden');
+      },
 
-      currentCoach = name;
-      showApp();
-    }
+      showApp() {
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('appScreen').classList.remove('hidden');
+        document.getElementById('coachDisplay').textContent = this.currentCoach;
+        this.loadData();
+      },
 
-    function handleLogout() {
-      currentCoach = null;
-      document.getElementById('coachName').value = '';
-      document.getElementById('password').value = '';
-      document.getElementById('loginError').textContent = '';
-      showLogin();
-    }
+      section(name, btn) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(name).classList.add('active');
+        btn.classList.add('active');
+      },
 
-    function showLogin() {
-      document.getElementById('loginScreen').classList.remove('hidden');
-      document.getElementById('appScreen').classList.add('hidden');
-    }
+      loadData() {
+        this.renderAthletes();
+        this.renderLeaderboard();
+      },
 
-    function showApp() {
-      document.getElementById('loginScreen').classList.add('hidden');
-      document.getElementById('appScreen').classList.remove('hidden');
-      document.getElementById('coachNameDisplay').textContent = currentCoach;
-      loadData();
-    }
+      refresh() {
+        if (this.currentCoach) {
+          this.renderAthletes();
+          this.renderLeaderboard();
+        }
+      },
 
-    function switchSection(section, btn) {
-      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(section).classList.add('active');
-      btn.classList.add('active');
-    }
+      getAthletes() {
+        return JSON.parse(localStorage.getItem('peakAthletes') || '[]');
+      },
 
-    function loadData() {
-      renderMetrics();
-      renderAthletes();
-      renderLeaderboard();
-    }
+      getAssessments() {
+        return JSON.parse(localStorage.getItem('peakAssessments') || '[]');
+      },
 
-    function renderMetrics() {
-      const m1 = document.getElementById('metricSelect');
-      const m2 = document.getElementById('assMetric');
-      const html = metrics.map(m => `<option value="${m.id}">${m.display}</option>`).join('');
-      m1.innerHTML = '<option value="">Select metric...</option>' + html;
-      m2.innerHTML = '<option value="">Select metric...</option>' + html;
-    }
+      saveAthletes(athletes) {
+        localStorage.setItem('peakAthletes', JSON.stringify(athletes));
+        this.renderAthletes();
+      },
 
-    function addAthlete() {
-      const name = document.getElementById('athleteName').value.trim();
-      const program = document.getElementById('athleteProgram').value;
-      const msg = document.getElementById('athleteMsg');
+      saveAssessments(assessments) {
+        localStorage.setItem('peakAssessments', JSON.stringify(assessments));
+        this.renderLeaderboard();
+      },
 
-      if (!name) {
-        msg.innerHTML = '<span class="error">Enter athlete name</span>';
-        return;
-      }
+      addAthlete() {
+        const name = document.getElementById('athleteName').value.trim();
+        const program = document.getElementById('athleteProgram').value;
+        const msg = document.getElementById('athleteMsg');
 
-      db.ref(`gyms/${GYM_ID}/athletes`).push({
-        name,
-        program,
-        createdAt: new Date().toISOString()
-      }).then(() => {
+        if (!name) {
+          msg.innerHTML = '<span class="error">Enter athlete name</span>';
+          return;
+        }
+
+        const athletes = this.getAthletes();
+        athletes.push({
+          id: Date.now(),
+          name,
+          program,
+          createdAt: new Date().toISOString()
+        });
+
+        this.saveAthletes(athletes);
         document.getElementById('athleteName').value = '';
         msg.innerHTML = '<span class="success">Athlete added!</span>';
-        renderAthletes();
-      }).catch(err => {
-        msg.innerHTML = `<span class="error">${err.message}</span>`;
-      });
-    }
+      },
 
-    function deleteAthlete(id) {
-      if (!confirm('Delete this athlete?')) return;
-      db.ref(`gyms/${GYM_ID}/athletes/${id}`).remove().then(() => {
-        renderAthletes();
-      });
-    }
+      deleteAthlete(id) {
+        if (!confirm('Delete this athlete?')) return;
+        const athletes = this.getAthletes();
+        const filtered = athletes.filter(a => a.id !== id);
+        this.saveAthletes(filtered);
+      },
 
-    function renderAthletes() {
-      db.ref(`gyms/${GYM_ID}/athletes`).once('value', snap => {
-        const data = snap.val() || {};
+      renderAthletes() {
+        const athletes = this.getAthletes();
         const tbody = document.getElementById('athletesBody');
-        const list = Object.entries(data);
 
-        if (list.length === 0) {
+        if (athletes.length === 0) {
           tbody.innerHTML = '<tr><td colspan="3" class="empty">No athletes yet</td></tr>';
         } else {
-          tbody.innerHTML = list.map(([id, a]) => `
+          tbody.innerHTML = athletes.map(a => `
             <tr>
               <td>${a.name}</td>
               <td>${a.program}</td>
-              <td><button onclick="deleteAthlete('${id}')" class="danger" style="width: auto; padding: 6px 12px; font-size: 12px;">Delete</button></td>
+              <td><button onclick="app.deleteAthlete(${a.id})" class="danger" style="width: auto; padding: 6px 12px; font-size: 12px;">Delete</button></td>
             </tr>
           `).join('');
         }
 
         const sel = document.getElementById('assAthlete');
-        sel.innerHTML = '<option value="">Select athlete...</option>' + list.map(([id, a]) => `<option value="${id}">${a.name}</option>`).join('');
-      });
-    }
+        sel.innerHTML = '<option value="">Select athlete...</option>' + athletes.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+      },
 
-    function addAssessment() {
-      const athleteId = document.getElementById('assAthlete').value;
-      const metricId = document.getElementById('assMetric').value;
-      const value = parseFloat(document.getElementById('assValue').value);
-      const msg = document.getElementById('assMsg');
+      addAssessment() {
+        const athleteId = parseInt(document.getElementById('assAthlete').value);
+        const metricId = document.getElementById('assMetric').value;
+        const value = parseFloat(document.getElementById('assValue').value);
+        const msg = document.getElementById('assMsg');
 
-      if (!athleteId || !metricId || isNaN(value)) {
-        msg.innerHTML = '<span class="error">Fill all fields</span>';
-        return;
-      }
+        if (!athleteId || !metricId || isNaN(value)) {
+          msg.innerHTML = '<span class="error">Fill all fields</span>';
+          return;
+        }
 
-      db.ref(`gyms/${GYM_ID}/assessments`).push({
-        athleteId,
-        metricId,
-        value,
-        recordedBy: currentCoach,
-        recordedAt: new Date().toISOString()
-      }).then(() => {
+        const assessments = this.getAssessments();
+        assessments.push({
+          id: Date.now(),
+          athleteId,
+          metricId,
+          value,
+          recordedBy: this.currentCoach,
+          recordedAt: new Date().toISOString()
+        });
+
+        this.saveAssessments(assessments);
         document.getElementById('assValue').value = '';
         msg.innerHTML = '<span class="success">Assessment recorded!</span>';
-        renderLeaderboard();
-      }).catch(err => {
-        msg.innerHTML = `<span class="error">${err.message}</span>`;
-      });
-    }
+      },
 
-    function renderLeaderboard() {
-      const metricId = document.getElementById('metricSelect').value;
-      const program = document.getElementById('programSelect').value;
+      renderLeaderboard() {
+        const metricId = document.getElementById('metricSelect').value;
+        const program = document.getElementById('programSelect').value;
 
-      if (!metricId) {
-        document.getElementById('leaderboardBody').innerHTML = '<tr><td colspan="4" class="empty">Select a metric</td></tr>';
-        return;
-      }
+        if (!metricId) {
+          document.getElementById('leaderboardBody').innerHTML = '<tr><td colspan="4" class="empty">Select a metric to view leaderboard</td></tr>';
+          return;
+        }
 
-      db.ref(`gyms/${GYM_ID}`).once('value', snap => {
-        const gym = snap.val() || {};
-        const assessments = gym.assessments || {};
-        const athletes = gym.athletes || {};
+        const athletes = this.getAthletes();
+        const assessments = this.getAssessments();
 
-        const relevant = Object.values(assessments).filter(a => a.metricId === metricId);
+        const relevant = assessments.filter(a => a.metricId === metricId);
         const latest = {};
 
         relevant.forEach(a => {
@@ -395,7 +397,7 @@
 
         let ranked = Object.values(latest).map(a => ({
           score: a.value,
-          athlete: athletes[a.athleteId]
+          athlete: athletes.find(ath => ath.id === a.athleteId)
         })).filter(r => r.athlete);
 
         if (program) {
@@ -417,8 +419,10 @@
             </tr>
           `).join('');
         }
-      });
-    }
+      }
+    };
+
+    app.init();
   </script>
 </body>
 </html>
