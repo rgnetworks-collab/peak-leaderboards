@@ -228,6 +228,7 @@
       <div id="assessments" class="section">
         <h2>Record Assessment</h2>
         <div class="form-box">
+          <h3>Add New Assessment</h3>
           <div class="form-group">
             <label>Athlete</label>
             <select id="assAthlete">
@@ -258,6 +259,23 @@
           <button onclick="app.addAssessment()" style="width: 100%;">Record Assessment</button>
           <div id="assMsg"></div>
         </div>
+
+        <h3>All Assessments</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Athlete</th>
+              <th>Metric</th>
+              <th>Value</th>
+              <th>Date</th>
+              <th>Recorded By</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="assessmentsTableBody">
+            <tr><td colspan="6" class="empty">No assessments yet</td></tr>
+          </tbody>
+        </table>
       </div>
 
       <!-- History -->
@@ -409,6 +427,7 @@
         this.renderAthletes();
         this.renderLeaderboard();
         this.renderHistory();
+        this.renderAssessments();
         this.renderCoaches();
         this.updateStats();
       },
@@ -418,6 +437,7 @@
           this.renderAthletes();
           this.renderLeaderboard();
           this.renderHistory();
+          this.renderAssessments();
           this.renderCoaches();
           this.updateStats();
         }
@@ -441,6 +461,7 @@
         localStorage.setItem('peakAssessments', JSON.stringify(assessments));
         this.renderLeaderboard();
         this.renderHistory();
+        this.renderAssessments();
         this.updateStats();
       },
 
@@ -574,6 +595,75 @@
         this.saveAssessments(assessments);
         document.getElementById('assValue').value = '';
         msg.innerHTML = '<span class="success">Assessment recorded!</span>';
+      },
+
+      renderAssessments() {
+        const assessments = this.getAssessments();
+        const athletes = this.getAthletes();
+        const tbody = document.getElementById('assessmentsTableBody');
+
+        if (assessments.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="empty">No assessments yet</td></tr>';
+          return;
+        }
+
+        const sorted = [...assessments].sort((a, b) => new Date(b.recordedAt) - new Date(a.recordedAt));
+
+        tbody.innerHTML = sorted.map(a => {
+          const athlete = athletes.find(ath => ath.id === a.athleteId);
+          const date = new Date(a.recordedAt).toLocaleDateString();
+          const metric = metricNames[a.metricId] || a.metricId;
+          
+          return `
+            <tr>
+              <td>${athlete?.name || 'Unknown'}</td>
+              <td>${metric}</td>
+              <td>${a.value}</td>
+              <td>${date}</td>
+              <td>${a.recordedBy}</td>
+              <td>
+                <div class="action-buttons">
+                  <button onclick="app.editAssessment(${a.id}, ${a.value})" style="background: #0066cc;">Edit</button>
+                  <button onclick="app.deleteAssessment(${a.id})" class="danger">Delete</button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      },
+
+      editAssessment(id, value) {
+        this.editingId = id;
+        document.getElementById('editValue').value = value;
+        document.getElementById('editModal').classList.add('active');
+      },
+
+      saveEdit() {
+        const value = parseFloat(document.getElementById('editValue').value);
+        if (isNaN(value)) {
+          alert('Enter a valid number');
+          return;
+        }
+
+        const assessments = this.getAssessments();
+        const ass = assessments.find(a => a.id === this.editingId);
+        if (ass) {
+          ass.value = value;
+          this.saveAssessments(assessments);
+        }
+        this.closeModal();
+      },
+
+      deleteAssessment(id) {
+        if (!confirm('Delete this assessment?')) return;
+        const assessments = this.getAssessments();
+        const filtered = assessments.filter(a => a.id !== id);
+        this.saveAssessments(filtered);
+      },
+
+      closeModal() {
+        document.getElementById('editModal').classList.remove('active');
+        this.editingId = null;
       },
 
       renderHistory() {
