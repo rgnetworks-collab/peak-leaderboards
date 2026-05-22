@@ -21,13 +21,15 @@
     
     .form-group { margin: 15px 0; }
     label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
-    input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
-    input:focus, select:focus { outline: none; border-color: #0066cc; box-shadow: 0 0 0 3px rgba(0,102,204,0.1); }
+    input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; font-family: inherit; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #0066cc; box-shadow: 0 0 0 3px rgba(0,102,204,0.1); }
     
     button { padding: 10px 20px; background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; }
     button:hover { background: #0052a3; }
     button.danger { background: #ff4444; }
     button.danger:hover { background: #cc0000; }
+    button.secondary { background: #666; }
+    button.secondary:hover { background: #555; }
     
     .error { color: red; font-size: 12px; margin-top: 5px; }
     .success { color: green; font-size: 12px; margin-top: 5px; }
@@ -40,6 +42,7 @@
     .section.active { display: block; }
     
     h2 { margin: 30px 0 20px 0; font-size: 24px; }
+    h3 { margin: 20px 0 15px 0; font-size: 18px; }
     
     table { width: 100%; border-collapse: collapse; background: white; margin: 20px 0; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
     th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
@@ -50,6 +53,20 @@
     .form-box { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
     
     .empty { text-align: center; color: #999; padding: 40px; }
+    
+    .action-buttons { display: flex; gap: 5px; }
+    .action-buttons button { padding: 4px 8px; font-size: 12px; width: auto; margin: 0; }
+    
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+    .modal.active { display: flex; align-items: center; justify-content: center; }
+    .modal-content { background: white; padding: 40px; border-radius: 8px; max-width: 500px; width: 90%; }
+    .modal-content h2 { margin-top: 0; }
+    
+    .stats { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 10px; }
+    .stat-item { text-align: center; }
+    .stat-value { font-size: 24px; font-weight: bold; color: #0066cc; }
+    .stat-label { font-size: 12px; color: #666; }
   </style>
 </head>
 <body>
@@ -59,12 +76,41 @@
       <h1>PEAK</h1>
       <p style="text-align: center; color: #666; margin-bottom: 30px;">Leaderboards</p>
       
-      <div class="form-group">
-        <label>Coach Name</label>
-        <input type="text" id="coachName" placeholder="Your name">
+      <div id="loginForm">
+        <div class="form-group">
+          <label>Coach Name</label>
+          <input type="text" id="coachName" placeholder="Your name">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="password" placeholder="Password">
+        </div>
+        <button onclick="app.login()" style="width: 100%;">Sign In</button>
+        <div id="loginError" class="error" style="text-align: center; margin-top: 10px;"></div>
       </div>
-      <button onclick="app.login()" style="width: 100%;">Sign In</button>
-      <div id="loginError" class="error" style="text-align: center; margin-top: 10px;"></div>
+
+      <div id="setupForm" class="hidden">
+        <p style="text-align: center; margin-bottom: 20px; color: #666;">First time? Set your password</p>
+        <div class="form-group">
+          <label>Coach Name</label>
+          <input type="text" id="setupName" placeholder="Your name">
+        </div>
+        <div class="form-group">
+          <label>Create Password</label>
+          <input type="password" id="setupPassword" placeholder="Password (min 6 chars)">
+        </div>
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" id="setupPassword2" placeholder="Confirm password">
+        </div>
+        <button onclick="app.setup()" style="width: 100%;">Create Account</button>
+        <button onclick="app.showLogin()" class="secondary" style="width: 100%; margin-top: 10px;">Back</button>
+        <div id="setupError" class="error" style="text-align: center; margin-top: 10px;"></div>
+      </div>
+
+      <div style="text-align: center; margin-top: 20px;">
+        <button onclick="app.showSetup()" class="secondary" style="width: 100%;">Create New Account</button>
+      </div>
     </div>
   </div>
 
@@ -86,12 +132,26 @@
       <nav>
         <button class="nav-btn active" onclick="app.section('dashboard', this)">Dashboard</button>
         <button class="nav-btn" onclick="app.section('athletes', this)">Athletes</button>
-        <button class="nav-btn" onclick="app.section('assessments', this)">Record Assessment</button>
+        <button class="nav-btn" onclick="app.section('assessments', this)">Assessments</button>
+        <button class="nav-btn" onclick="app.section('history', this)">History</button>
       </nav>
 
       <!-- Dashboard -->
       <div id="dashboard" class="section active">
         <h2>Leaderboards</h2>
+        <div class="stats">
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-value" id="athleteCount">0</div>
+              <div class="stat-label">Athletes</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="assessmentCount">0</div>
+              <div class="stat-label">Assessments</div>
+            </div>
+          </div>
+        </div>
+
         <div class="filter-box">
           <div>
             <label>Assessment</label>
@@ -142,6 +202,7 @@
       <div id="athletes" class="section">
         <h2>Manage Athletes</h2>
         <div class="form-box">
+          <h3>Add Single Athlete</h3>
           <div class="form-group">
             <label>Athlete Name</label>
             <input type="text" id="athleteName" placeholder="Name">
@@ -160,16 +221,25 @@
           <div id="athleteMsg"></div>
         </div>
 
+        <div class="form-box">
+          <h3>Import Athletes (CSV)</h3>
+          <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Format: name, program (one per line)</p>
+          <textarea id="csvInput" placeholder="John Doe, High School (Grades 9-12)&#10;Jane Smith, College" style="height: 150px;"></textarea>
+          <button onclick="app.importCSV()" style="width: 100%; margin-top: 10px;">Import Athletes</button>
+          <div id="importMsg"></div>
+        </div>
+
         <table>
           <thead>
             <tr>
               <th>Name</th>
               <th>Program</th>
+              <th>Assessments</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody id="athletesBody">
-            <tr><td colspan="3" class="empty">No athletes yet</td></tr>
+            <tr><td colspan="4" class="empty">No athletes yet</td></tr>
           </tbody>
         </table>
       </div>
@@ -177,7 +247,7 @@
       <!-- Assessments -->
       <div id="assessments" class="section">
         <h2>Record Assessment</h2>
-        <div class="form-box" style="max-width: 500px;">
+        <div class="form-box">
           <div class="form-group">
             <label>Athlete</label>
             <select id="assAthlete">
@@ -209,12 +279,60 @@
           <div id="assMsg"></div>
         </div>
       </div>
+
+      <!-- History -->
+      <div id="history" class="section">
+        <h2>Assessment History</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Athlete</th>
+              <th>Metric</th>
+              <th>Value</th>
+              <th>Date</th>
+              <th>Recorded By</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody">
+            <tr><td colspan="6" class="empty">No assessments yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <h2>Edit Assessment</h2>
+      <div class="form-group">
+        <label>Value</label>
+        <input type="number" id="editValue" step="0.1">
+      </div>
+      <button onclick="app.saveEdit()" style="width: 100%;">Save</button>
+      <button onclick="app.closeModal()" class="secondary" style="width: 100%; margin-top: 10px;">Cancel</button>
     </div>
   </div>
 
   <script>
+    const metricNames = {
+      '1': 'Hand Grip Test',
+      '2': 'Bar Hang',
+      '3': 'Pull-Ups (60 sec)',
+      '4': 'Push-Ups (60 sec)',
+      '5': 'Trap Bar Deadlift 1RM',
+      '6': 'Plank Time',
+      '7': 'Bike RPM',
+      '8': 'Squat 1RM',
+      '9': 'Bench Press 1RM',
+      '10': 'Vertical Jump',
+      '11': 'Row 500M'
+    };
+
     const app = {
       currentCoach: null,
+      editingId: null,
 
       init() {
         this.loadCoach();
@@ -222,36 +340,76 @@
       },
 
       loadCoach() {
-        this.currentCoach = localStorage.getItem('peakCoach');
-        if (this.currentCoach) {
+        const coaches = JSON.parse(localStorage.getItem('peakCoaches') || '{}');
+        this.currentCoach = localStorage.getItem('peakCurrentCoach');
+        
+        if (this.currentCoach && coaches[this.currentCoach]) {
           this.showApp();
         } else {
           this.showLogin();
         }
       },
 
+      showLogin() {
+        document.getElementById('loginScreen').classList.remove('hidden');
+        document.getElementById('appScreen').classList.add('hidden');
+        document.getElementById('loginForm').classList.remove('hidden');
+        document.getElementById('setupForm').classList.add('hidden');
+      },
+
+      showSetup() {
+        document.getElementById('loginForm').classList.add('hidden');
+        document.getElementById('setupForm').classList.remove('hidden');
+      },
+
+      setup() {
+        const name = document.getElementById('setupName').value.trim();
+        const pass1 = document.getElementById('setupPassword').value;
+        const pass2 = document.getElementById('setupPassword2').value;
+        const err = document.getElementById('setupError');
+
+        if (!name) { err.textContent = 'Enter name'; return; }
+        if (pass1.length < 6) { err.textContent = 'Password must be at least 6 characters'; return; }
+        if (pass1 !== pass2) { err.textContent = 'Passwords do not match'; return; }
+
+        const coaches = JSON.parse(localStorage.getItem('peakCoaches') || '{}');
+        if (coaches[name]) { err.textContent = 'Coach already exists'; return; }
+
+        coaches[name] = { password: pass1 };
+        localStorage.setItem('peakCoaches', JSON.stringify(coaches));
+        localStorage.setItem('peakCurrentCoach', name);
+        this.currentCoach = name;
+        this.showApp();
+      },
+
       login() {
         const name = document.getElementById('coachName').value.trim();
-        if (!name) {
-          document.getElementById('loginError').textContent = 'Enter your name';
-          return;
-        }
-        localStorage.setItem('peakCoach', name);
+        const pass = document.getElementById('password').value;
+        const err = document.getElementById('loginError');
+
+        if (!name) { err.textContent = 'Enter name'; return; }
+        if (!pass) { err.textContent = 'Enter password'; return; }
+
+        const coaches = JSON.parse(localStorage.getItem('peakCoaches') || '{}');
+        if (!coaches[name]) { err.textContent = 'Coach not found'; return; }
+        if (coaches[name].password !== pass) { err.textContent = 'Wrong password'; return; }
+
+        localStorage.setItem('peakCurrentCoach', name);
         this.currentCoach = name;
         this.showApp();
       },
 
       logout() {
-        localStorage.removeItem('peakCoach');
+        localStorage.removeItem('peakCurrentCoach');
         this.currentCoach = null;
         document.getElementById('coachName').value = '';
+        document.getElementById('password').value = '';
+        document.getElementById('setupName').value = '';
+        document.getElementById('setupPassword').value = '';
+        document.getElementById('setupPassword2').value = '';
         document.getElementById('loginError').textContent = '';
+        document.getElementById('setupError').textContent = '';
         this.showLogin();
-      },
-
-      showLogin() {
-        document.getElementById('loginScreen').classList.remove('hidden');
-        document.getElementById('appScreen').classList.add('hidden');
       },
 
       showApp() {
@@ -271,12 +429,16 @@
       loadData() {
         this.renderAthletes();
         this.renderLeaderboard();
+        this.renderHistory();
+        this.updateStats();
       },
 
       refresh() {
         if (this.currentCoach) {
           this.renderAthletes();
           this.renderLeaderboard();
+          this.renderHistory();
+          this.updateStats();
         }
       },
 
@@ -291,11 +453,21 @@
       saveAthletes(athletes) {
         localStorage.setItem('peakAthletes', JSON.stringify(athletes));
         this.renderAthletes();
+        this.updateStats();
       },
 
       saveAssessments(assessments) {
         localStorage.setItem('peakAssessments', JSON.stringify(assessments));
         this.renderLeaderboard();
+        this.renderHistory();
+        this.updateStats();
+      },
+
+      updateStats() {
+        const athletes = this.getAthletes();
+        const assessments = this.getAssessments();
+        document.getElementById('athleteCount').textContent = athletes.length;
+        document.getElementById('assessmentCount').textContent = assessments.length;
       },
 
       addAthlete() {
@@ -321,27 +493,76 @@
         msg.innerHTML = '<span class="success">Athlete added!</span>';
       },
 
-      deleteAthlete(id) {
-        if (!confirm('Delete this athlete?')) return;
+      importCSV() {
+        const csv = document.getElementById('csvInput').value.trim();
+        const msg = document.getElementById('importMsg');
+
+        if (!csv) {
+          msg.innerHTML = '<span class="error">Paste data first</span>';
+          return;
+        }
+
+        const lines = csv.split('\n').filter(l => l.trim());
         const athletes = this.getAthletes();
+        let added = 0;
+
+        lines.forEach(line => {
+          const [name, program] = line.split(',').map(s => s.trim());
+          if (name && program) {
+            athletes.push({
+              id: Date.now() + Math.random(),
+              name,
+              program,
+              createdAt: new Date().toISOString()
+            });
+            added++;
+          }
+        });
+
+        if (added > 0) {
+          this.saveAthletes(athletes);
+          document.getElementById('csvInput').value = '';
+          msg.innerHTML = `<span class="success">${added} athletes imported!</span>`;
+        } else {
+          msg.innerHTML = '<span class="error">No valid data found. Use format: name, program</span>';
+        }
+      },
+
+      deleteAthlete(id) {
+        if (!confirm('Delete this athlete and all their assessments?')) return;
+        const athletes = this.getAthletes();
+        const assessments = this.getAssessments();
+        
         const filtered = athletes.filter(a => a.id !== id);
-        this.saveAthletes(filtered);
+        const filteredAss = assessments.filter(a => a.athleteId !== id);
+        
+        localStorage.setItem('peakAthletes', JSON.stringify(filtered));
+        localStorage.setItem('peakAssessments', JSON.stringify(filteredAss));
+        this.renderAthletes();
+        this.renderLeaderboard();
+        this.renderHistory();
+        this.updateStats();
       },
 
       renderAthletes() {
         const athletes = this.getAthletes();
+        const assessments = this.getAssessments();
         const tbody = document.getElementById('athletesBody');
 
         if (athletes.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="3" class="empty">No athletes yet</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="4" class="empty">No athletes yet</td></tr>';
         } else {
-          tbody.innerHTML = athletes.map(a => `
-            <tr>
-              <td>${a.name}</td>
-              <td>${a.program}</td>
-              <td><button onclick="app.deleteAthlete(${a.id})" class="danger" style="width: auto; padding: 6px 12px; font-size: 12px;">Delete</button></td>
-            </tr>
-          `).join('');
+          tbody.innerHTML = athletes.map(a => {
+            const count = assessments.filter(as => as.athleteId === a.id).length;
+            return `
+              <tr>
+                <td>${a.name}</td>
+                <td>${a.program}</td>
+                <td>${count}</td>
+                <td><button onclick="app.deleteAthlete(${a.id})" class="danger" style="width: auto; padding: 6px 12px; font-size: 12px;">Delete</button></td>
+              </tr>
+            `;
+          }).join('');
         }
 
         const sel = document.getElementById('assAthlete');
@@ -372,6 +593,75 @@
         this.saveAssessments(assessments);
         document.getElementById('assValue').value = '';
         msg.innerHTML = '<span class="success">Assessment recorded!</span>';
+      },
+
+      renderHistory() {
+        const assessments = this.getAssessments();
+        const athletes = this.getAthletes();
+        const tbody = document.getElementById('historyBody');
+
+        if (assessments.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="empty">No assessments yet</td></tr>';
+          return;
+        }
+
+        const sorted = [...assessments].sort((a, b) => new Date(b.recordedAt) - new Date(a.recordedAt));
+
+        tbody.innerHTML = sorted.map(a => {
+          const athlete = athletes.find(ath => ath.id === a.athleteId);
+          const date = new Date(a.recordedAt).toLocaleDateString();
+          const metric = metricNames[a.metricId] || a.metricId;
+          
+          return `
+            <tr>
+              <td>${athlete?.name || 'Unknown'}</td>
+              <td>${metric}</td>
+              <td>${a.value}</td>
+              <td>${date}</td>
+              <td>${a.recordedBy}</td>
+              <td>
+                <div class="action-buttons">
+                  <button onclick="app.editAssessment(${a.id}, ${a.value})" style="background: #0066cc;">Edit</button>
+                  <button onclick="app.deleteAssessment(${a.id})" class="danger">Delete</button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      },
+
+      editAssessment(id, value) {
+        this.editingId = id;
+        document.getElementById('editValue').value = value;
+        document.getElementById('editModal').classList.add('active');
+      },
+
+      saveEdit() {
+        const value = parseFloat(document.getElementById('editValue').value);
+        if (isNaN(value)) {
+          alert('Enter a valid number');
+          return;
+        }
+
+        const assessments = this.getAssessments();
+        const ass = assessments.find(a => a.id === this.editingId);
+        if (ass) {
+          ass.value = value;
+          this.saveAssessments(assessments);
+        }
+        this.closeModal();
+      },
+
+      deleteAssessment(id) {
+        if (!confirm('Delete this assessment?')) return;
+        const assessments = this.getAssessments();
+        const filtered = assessments.filter(a => a.id !== id);
+        this.saveAssessments(filtered);
+      },
+
+      closeModal() {
+        document.getElementById('editModal').classList.remove('active');
+        this.editingId = null;
       },
 
       renderLeaderboard() {
