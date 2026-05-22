@@ -434,35 +434,47 @@
         if (!name || !pass) { err.textContent = 'Fill all fields'; return; }
 
         try {
-          // Query ALL coaches (no filter) to avoid Supabase query issues
+          // Fetch with NO query parameters - just get raw table
           const res = await fetch(`${SUPABASE_URL}/rest/v1/coaches`, {
-            headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY }
+            method: 'GET',
+            headers: { 
+              'Authorization': `Bearer ${SUPABASE_KEY}`, 
+              'apikey': SUPABASE_KEY,
+              'Content-Type': 'application/json'
+            }
           });
-          const allCoaches = await res.json();
           
-          console.log('All coaches:', allCoaches);
-          
-          // Find the coach by name in JavaScript
-          const coach = allCoaches.find(c => c.name.toLowerCase() === name.toLowerCase());
-          
-          if (!coach) {
-            err.textContent = 'Coach not found: ' + name;
+          if (!res.ok) {
+            err.textContent = 'Database error: ' + res.status;
             return;
           }
           
-          // Compare passwords
+          const allCoaches = await res.json();
+          console.log('All coaches from DB:', allCoaches);
+          
+          // Find coach case-insensitively
+          const coach = allCoaches.find(c => c.name && c.name.toLowerCase() === name.toLowerCase());
+          
+          if (!coach) {
+            err.textContent = 'Coach "' + name + '" not found. Available: ' + allCoaches.map(c => c.name).join(', ');
+            return;
+          }
+          
+          console.log('Found coach:', coach);
+          console.log('Checking password:', pass, '===', coach.password, '?', pass === coach.password);
+          
           if (coach.password !== pass) {
-            err.textContent = 'Invalid password for ' + name;
+            err.textContent = 'Wrong password for ' + name;
             return;
           }
 
-          // Success!
+          // SUCCESS
           localStorage.setItem('peakCurrentCoach', name);
           localStorage.removeItem('peakCurrentAthlete');
           this.currentCoach = name;
           this.showApp();
         } catch (e) {
-          err.textContent = 'Error: ' + e.message;
+          err.textContent = 'Network error: ' + e.message;
           console.error('Login error:', e);
         }
       },
