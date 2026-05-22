@@ -73,6 +73,7 @@
   <!-- LOGIN SCREEN -->
   <div id="loginScreen">
     <div class="login-container">
+      <img src="logo.png" alt="PEAK" style="height: 80px; width: 80px; border-radius: 50%; margin: 0 auto 20px; display: block;">
       <h1>PEAK</h1>
       <p style="text-align: center; color: #666; margin-bottom: 30px;">Leaderboards</p>
       
@@ -98,7 +99,10 @@
     <header>
       <div class="container">
         <div class="header-flex">
-          <h1>PEAK Leaderboards</h1>
+          <div style="display: flex; align-items: center; gap: 15px;">
+            <img src="logo.png" alt="PEAK" style="height: 40px; width: 40px; border-radius: 50%;">
+            <h1 style="margin: 0;">PEAK Leaderboards</h1>
+          </div>
           <div class="user-info">
             <span id="coachDisplay"></span>
             <button onclick="app.logout()" style="width: auto;">Logout</button>
@@ -917,6 +921,8 @@
           }
         });
       },
+
+      renderCoaches() {
         const coaches = JSON.parse(localStorage.getItem('peakCoaches') || '{}');
         const tbody = document.getElementById('coachesBody');
         const coachNames = Object.keys(coaches);
