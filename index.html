@@ -439,8 +439,17 @@
           });
           const coaches = await res.json();
           
-          if (!coaches.length || coaches[0].password !== pass) {
-            err.textContent = 'Invalid credentials';
+          console.log('Coaches found:', coaches);
+          console.log('Password entered:', pass);
+          console.log('Password in DB:', coaches.length > 0 ? coaches[0].password : 'none');
+          
+          if (!coaches.length) {
+            err.textContent = 'Coach not found: ' + name;
+            return;
+          }
+          
+          if (coaches[0].password.trim() !== pass.trim()) {
+            err.textContent = 'Password mismatch. Expected: ' + coaches[0].password + ' Got: ' + pass;
             return;
           }
 
@@ -450,6 +459,7 @@
           this.showApp();
         } catch (e) {
           err.textContent = 'Error: ' + e.message;
+          console.error('Login error:', e);
         }
       },
 
