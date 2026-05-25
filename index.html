@@ -128,7 +128,6 @@
         <button class="nav-btn active" onclick="app.section('dashboard', this)">Dashboard</button>
         <button class="nav-btn" onclick="app.section('athletes', this)">Athletes</button>
         <button class="nav-btn" onclick="app.section('assessments', this)">Assessments</button>
-        <button class="nav-btn" onclick="app.section('analytics', this)">Analytics</button>
         <button class="nav-btn" onclick="app.section('history', this)">History</button>
         <button class="nav-btn" onclick="app.section('metrics', this)">Metrics</button>
         <button class="nav-btn" onclick="app.section('coaches', this)">Coaches</button>
@@ -308,50 +307,15 @@
         </table>
       </div>
 
-      <!-- Analytics -->
-      <div id="analytics" class="section">
-        <h2>Progress Analytics</h2>
-        <div class="form-box">
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-            <div class="form-group">
-              <label>Select Athlete</label>
-              <select id="analyticsAthlete" onchange="app.updateAnalyticsChart()">
-                <option value="">Choose athlete...</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Time Period</label>
-              <select id="analyticsPeriod" onchange="app.updateAnalyticsChart()">
-                <option value="30">Last 30 Days</option>
-                <option value="60">Last 60 Days</option>
-                <option value="90">Last 90 Days</option>
-                <option value="all">All Time</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>&nbsp;</label>
-              <button onclick="app.toggleMetricsPanel()" style="width: 100%;">Select Metrics</button>
-            </div>
-          </div>
-          
-          <div id="metricsPanel" class="hidden" style="background: #f9f9f9; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
-            <p style="font-weight: bold; margin-bottom: 10px;">Choose metrics to display:</p>
-            <div id="metricCheckboxes" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;"></div>
-            <button onclick="app.toggleMetricsPanel()" style="margin-top: 10px; background: #666;">Done</button>
-          </div>
-        </div>
-        
-        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 20px;">
-          <canvas id="progressChart" style="height: 400px;"></canvas>
-        </div>
-        
-        <div id="chartMessage" style="text-align: center; color: #999; padding: 40px;">Select an athlete and metrics to view progress</div>
-      </div>
-
       <!-- History -->
       <div id="history" class="section">
         <h2>Assessment History</h2>
-        <button onclick="app.exportToCSV()" style="margin-bottom: 20px; background: #000;">📥 Export to CSV</button>
+        <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+          <button onclick="app.exportToCSV()" style="background: #000;">📥 Export to CSV</button>
+          <button onclick="document.getElementById('csvFileInput').click()" style="background: #000;">📤 Import CSV</button>
+          <input type="file" id="csvFileInput" accept=".csv" style="display: none;" onchange="app.importCSV(event)">
+        </div>
+        <div id="importStatus" style="margin-bottom: 15px; padding: 10px; border-radius: 4px; display: none;"></div>
         <table>
           <thead>
             <tr>
@@ -545,7 +509,6 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script>
     const SUPABASE_URL = 'https://eavcqgsjxvaisrfkrswq.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_a6hb7wOMpE5j9pVQI9S-ig_ewNS1iDv';
@@ -706,10 +669,6 @@
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(name).classList.add('active');
         btn.classList.add('active');
-        
-        if (name === 'analytics') {
-          this.initAnalyticsTab();
-        }
       },
 
       async loadData() {
@@ -1499,7 +1458,7 @@
           const dataByMetric = {};
           selectedMetrics.forEach(metricId => {
             const metricData = filtered
-              .filter(a => a.metric_id === parseInt(metricId))
+              .filter(a => String(a.metric_id) === String(metricId))
               .sort((a, b) => new Date(a.recorded_at) - new Date(b.recorded_at));
             
             if (metricData.length > 0) {
@@ -1522,7 +1481,7 @@
           const datasets = Object.entries(dataByMetric).map(([metricId, data], idx) => {
             return {
               label: this.metrics[metricId],
-              data: data.map(d => ({ x: new Date(d.recorded_at), y: d.value })),
+              data: data.map(d => ({ x: new Date(d.recorded_at), y: parseFloat(d.value) })),
               borderColor: colors[idx % colors.length],
               backgroundColor: colors[idx % colors.length] + '20',
               borderWidth: 2.5,
@@ -1661,6 +1620,158 @@
           window.URL.revokeObjectURL(url);
         } catch (e) {
           alert('Export error: ' + e.message);
+        }
+      },
+
+      async importCSV(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const statusEl = document.getElementById('importStatus');
+        statusEl.style.display = 'block';
+        statusEl.textContent = 'Processing CSV...';
+        statusEl.style.backgroundColor = '#f0f0f0';
+        statusEl.style.color = '#666';
+
+        try {
+          const text = await file.text();
+          const lines = text.trim().split('\n');
+          
+          if (lines.length < 2) {
+            statusEl.textContent = 'CSV file is empty';
+            statusEl.style.backgroundColor = '#ffebee';
+            statusEl.style.color = 'red';
+            return;
+          }
+
+          // Parse CSV header and rows
+          const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/"/g, ''));
+          
+          // Validate required columns
+          if (!headers.includes('athlete') || !headers.includes('metric') || !headers.includes('value') || !headers.includes('date')) {
+            statusEl.textContent = 'CSV must have columns: Athlete, Metric, Value, Date';
+            statusEl.style.backgroundColor = '#ffebee';
+            statusEl.style.color = 'red';
+            return;
+          }
+
+          const athleteIdx = headers.indexOf('athlete');
+          const metricIdx = headers.indexOf('metric');
+          const valueIdx = headers.indexOf('value');
+          const dateIdx = headers.indexOf('date');
+          const recordedByIdx = headers.indexOf('recorded by') >= 0 ? headers.indexOf('recorded by') : -1;
+
+          // Parse data rows
+          const athletes = await this.loadAthletes();
+          let imported = 0;
+          let skipped = 0;
+          const errors = [];
+
+          for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+
+            const parts = line.split(',').map(p => p.trim().replace(/^"|"$/g, ''));
+            
+            const athleteName = parts[athleteIdx]?.trim();
+            const metricName = parts[metricIdx]?.trim();
+            const value = parseFloat(parts[valueIdx]);
+            const dateStr = parts[dateIdx]?.trim();
+            const recordedBy = recordedByIdx >= 0 ? parts[recordedByIdx]?.trim() : 'Import';
+
+            // Validate row
+            if (!athleteName || !metricName || isNaN(value) || !dateStr) {
+              skipped++;
+              errors.push(`Row ${i + 1}: Missing data`);
+              continue;
+            }
+
+            // Find athlete
+            const athlete = athletes.find(a => a.name.toLowerCase() === athleteName.toLowerCase());
+            if (!athlete) {
+              skipped++;
+              errors.push(`Row ${i + 1}: Athlete "${athleteName}" not found`);
+              continue;
+            }
+
+            // Find metric
+            let metricId = Object.entries(this.metrics).find(([_, name]) => 
+              name.toLowerCase() === metricName.toLowerCase()
+            )?.[0];
+
+            if (!metricId) {
+              skipped++;
+              errors.push(`Row ${i + 1}: Metric "${metricName}" not found`);
+              continue;
+            }
+
+            // Validate date
+            const parsedDate = new Date(dateStr);
+            if (isNaN(parsedDate.getTime())) {
+              skipped++;
+              errors.push(`Row ${i + 1}: Invalid date`);
+              continue;
+            }
+
+            // Insert assessment
+            try {
+              const res = await fetch(`${SUPABASE_URL}/rest/v1/assessments`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${SUPABASE_KEY}`,
+                  'apikey': SUPABASE_KEY,
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  athlete_id: athlete.id,
+                  metric_id: parseInt(metricId),
+                  value: value,
+                  recorded_at: parsedDate.toISOString(),
+                  recorded_by: recordedBy || 'Import'
+                })
+              });
+
+              if (res.ok) {
+                imported++;
+              } else {
+                skipped++;
+                errors.push(`Row ${i + 1}: Database error`);
+              }
+            } catch (e) {
+              skipped++;
+              errors.push(`Row ${i + 1}: ${e.message}`);
+            }
+          }
+
+          // Refresh data
+          if (imported > 0) {
+            await this.loadAssessments();
+            this.renderHistory();
+            this.renderLeaderboard();
+            this.updateStats();
+          }
+
+          // Show results
+          let message = `✓ Imported ${imported} assessments`;
+          if (skipped > 0) message += ` | ⚠ Skipped ${skipped}`;
+          
+          if (errors.length > 0) {
+            message += `\n\nErrors:\n${errors.slice(0, 5).join('\n')}`;
+            if (errors.length > 5) message += `\n...and ${errors.length - 5} more`;
+          }
+
+          statusEl.textContent = message;
+          statusEl.style.backgroundColor = imported > 0 ? '#e8f5e9' : '#fff3e0';
+          statusEl.style.color = imported > 0 ? 'green' : '#ff9800';
+          statusEl.style.whiteSpace = 'pre-wrap';
+          statusEl.style.fontSize = '12px';
+
+          // Reset file input
+          document.getElementById('csvFileInput').value = '';
+        } catch (e) {
+          statusEl.textContent = `Error: ${e.message}`;
+          statusEl.style.backgroundColor = '#ffebee';
+          statusEl.style.color = 'red';
         }
       }
     };
