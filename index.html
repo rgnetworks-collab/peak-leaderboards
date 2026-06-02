@@ -130,6 +130,7 @@
         <button class="nav-btn" onclick="app.section('assessments', this)">Assessments</button>
         <button class="nav-btn" onclick="app.section('history', this)">History</button>
         <button class="nav-btn" onclick="app.section('metrics', this)">Metrics</button>
+        <button class="nav-btn" onclick="app.section('programs', this)">Programs</button>
         <button class="nav-btn" onclick="app.section('coaches', this)">Coaches</button>
       </nav>
 
@@ -336,9 +337,6 @@
       <!-- Metrics -->
       <div id="metrics" class="section">
         <h2>Manage Metrics</h2>
-        <div style="margin-bottom: 20px;">
-          <a href="https://www.nasm.org/resource-center/exercise-library" target="_blank" rel="noopener noreferrer" style="display: inline-block; padding: 10px 15px; background: #F54A05; color: white; border-radius: 4px; text-decoration: none; font-weight: bold;">📚 NASM Exercise Library</a>
-        </div>
         <div class="form-box">
           <h3>Add New Metric</h3>
           <div class="form-group">
@@ -360,6 +358,16 @@
             <tr><td colspan="2" class="empty">Loading metrics...</td></tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Programs -->
+      <div id="programs" class="section">
+        <h2>Workout Programs</h2>
+        <div style="text-align: center; padding: 40px;">
+          <p style="color: #666; margin-bottom: 20px;">Access your shared program library</p>
+          <a href="https://drive.google.com/drive/folders/1L4ICgp7yL9aQhGwEVOZ7OFUvf0bneJoj?usp=sharing" target="_blank" rel="noopener noreferrer" style="display: inline-block; padding: 15px 30px; background: #F54A05; color: white; border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 16px;">📁 Open Programs Folder</a>
+          <p style="color: #999; font-size: 12px; margin-top: 20px;">Opens Google Drive in a new tab</p>
+        </div>
       </div>
 
       <!-- Coaches -->
