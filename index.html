@@ -130,7 +130,6 @@
         <button class="nav-btn" onclick="app.section('assessments', this)">Assessments</button>
         <button class="nav-btn" onclick="app.section('history', this)">History</button>
         <button class="nav-btn" onclick="app.section('metrics', this)">Metrics</button>
-        <button class="nav-btn" onclick="app.section('programs', this)">Programs</button>
         <button class="nav-btn" onclick="app.section('coaches', this)">Coaches</button>
       </nav>
 
@@ -360,16 +359,6 @@
         </table>
       </div>
 
-      <!-- Programs -->
-      <div id="programs" class="section">
-        <h2>Workout Programs</h2>
-        <div style="text-align: center; padding: 40px;">
-          <p style="color: #666; margin-bottom: 20px;">Access your shared program library</p>
-          <a href="https://drive.google.com/drive/folders/1L4ICgp7yL9aQhGwEVOZ7OFUvf0bneJoj?usp=sharing" target="_blank" rel="noopener noreferrer" style="display: inline-block; padding: 15px 30px; background: #F54A05; color: white; border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 16px;">📁 Open Programs Folder</a>
-          <p style="color: #999; font-size: 12px; margin-top: 20px;">Opens Google Drive in a new tab</p>
-        </div>
-      </div>
-
       <!-- Coaches -->
       <div id="coaches" class="section">
         <h2>Manage Coaches</h2>
@@ -529,6 +518,7 @@
       currentAthlete: null,
       editingId: null,
       metrics: {},
+      metricDetails: {},
 
       init() {
         this.loadUser();
@@ -702,11 +692,19 @@
           });
           const metrics = await res.json();
           this.metrics = {};
-          metrics.forEach(m => this.metrics[m.id] = m.name);
+          this.metricDetails = {};
+          metrics.forEach(m => {
+            this.metrics[m.id] = m.name;
+            this.metricDetails[m.id] = m;
+          });
           this.updateMetricSelects();
         } catch (e) {
           console.error('Error loading metrics:', e);
         }
+      },
+
+      async getMetricDetails(metricId) {
+        return this.metricDetails[metricId] || null;
       },
 
       updateMetricSelects() {
@@ -1020,6 +1018,7 @@
         try {
           const athletes = await this.loadAthletes();
           const assessments = await this.loadAssessments();
+          const metricDetails = await this.getMetricDetails(metricId);
 
           const relevant = assessments.filter(a => a.metric_id === parseInt(metricId));
           const latest = {};
@@ -1039,7 +1038,12 @@
             ranked = ranked.filter(r => r.athlete.program === program);
           }
 
-          ranked.sort((a, b) => b.score - a.score);
+          // Sort based on metric's sort_order (ascending or descending)
+          if (metricDetails && metricDetails.sort_order === 'asc') {
+            ranked.sort((a, b) => a.score - b.score);
+          } else {
+            ranked.sort((a, b) => b.score - a.score);
+          }
 
           const tbody = document.getElementById('leaderboardBody');
           if (ranked.length === 0) {
