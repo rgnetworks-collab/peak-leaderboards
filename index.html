@@ -128,6 +128,7 @@
         <button class="nav-btn active" onclick="app.section('dashboard', this)">Dashboard</button>
         <button class="nav-btn" onclick="app.section('athletes', this)">Athletes</button>
         <button class="nav-btn" onclick="app.section('assessments', this)">Assessments</button>
+        <button class="nav-btn" onclick="app.section('insights', this)">Insights</button>
         <button class="nav-btn" onclick="app.section('history', this)">History</button>
         <button class="nav-btn" onclick="app.section('metrics', this)">Metrics</button>
         <button class="nav-btn" onclick="app.section('coaches', this)">Coaches</button>
@@ -305,6 +306,40 @@
             <tr><td colspan="6" class="empty">No assessments yet</td></tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Insights -->
+      <div id="insights" class="section">
+        <h2>Performance Insights</h2>
+        <div class="form-box">
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+            <div class="form-group">
+              <label>Select Athlete</label>
+              <select id="insightsAthlete" onchange="app.loadInsights()">
+                <option value="">Choose athlete...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Select Metric</label>
+              <select id="insightsMetric" onchange="app.loadInsights()">
+                <option value="">Choose metric...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Time Period</label>
+              <select id="insightsPeriod" onchange="app.loadInsights()">
+                <option value="all">All Time</option>
+                <option value="30">Last 30 Days</option>
+                <option value="60">Last 60 Days</option>
+                <option value="90">Last 90 Days</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div id="insightsDisplay" style="margin-top: 20px;">
+          <p style="text-align: center; color: #999; padding: 40px;">Select athlete and metric to view insights</p>
+        </div>
       </div>
 
       <!-- History -->
@@ -518,7 +553,6 @@
       currentAthlete: null,
       editingId: null,
       metrics: {},
-      metricDetails: {},
 
       init() {
         this.loadUser();
@@ -674,7 +708,7 @@
 
       async loadData() {
         await this.loadMetrics();
-        await this.loadAthletes();
+        const athletes = await this.loadAthletes();
         await this.loadAssessments();
         this.renderLeaderboard();
         this.renderAthletes();
@@ -682,6 +716,7 @@
         this.renderHistory();
         this.renderMetrics();
         this.renderCoaches();
+        this.populateInsightsSelects(athletes);
         this.updateStats();
       },
 
@@ -692,19 +727,11 @@
           });
           const metrics = await res.json();
           this.metrics = {};
-          this.metricDetails = {};
-          metrics.forEach(m => {
-            this.metrics[m.id] = m.name;
-            this.metricDetails[m.id] = m;
-          });
+          metrics.forEach(m => this.metrics[m.id] = m.name);
           this.updateMetricSelects();
         } catch (e) {
           console.error('Error loading metrics:', e);
         }
-      },
-
-      async getMetricDetails(metricId) {
-        return this.metricDetails[metricId] || null;
       },
 
       updateMetricSelects() {
@@ -829,7 +856,12 @@
           
           // Populate athlete selector in assessments section
           const sel = document.getElementById('assAthlete');
-          sel.innerHTML = '<option value="">Select athlete...</option>' + athletes.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+          const sortedAthletes = [...athletes].sort((a, b) => {
+            const lastA = a.name.split(' ').pop().toLowerCase();
+            const lastB = b.name.split(' ').pop().toLowerCase();
+            return lastA.localeCompare(lastB);
+          });
+          sel.innerHTML = '<option value="">Select athlete...</option>' + sortedAthletes.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
           
           // Initial render with filters
           this.filterAndSortAthletes();
@@ -1018,7 +1050,6 @@
         try {
           const athletes = await this.loadAthletes();
           const assessments = await this.loadAssessments();
-          const metricDetails = await this.getMetricDetails(metricId);
 
           const relevant = assessments.filter(a => a.metric_id === parseInt(metricId));
           const latest = {};
@@ -1038,12 +1069,7 @@
             ranked = ranked.filter(r => r.athlete.program === program);
           }
 
-          // Sort based on metric's sort_order (ascending or descending)
-          if (metricDetails && metricDetails.sort_order === 'asc') {
-            ranked.sort((a, b) => a.score - b.score);
-          } else {
-            ranked.sort((a, b) => b.score - a.score);
-          }
+          ranked.sort((a, b) => b.score - a.score);
 
           const tbody = document.getElementById('leaderboardBody');
           if (ranked.length === 0) {
@@ -1635,6 +1661,131 @@
           window.URL.revokeObjectURL(url);
         } catch (e) {
           alert('Export error: ' + e.message);
+        }
+      },
+
+      populateInsightsSelects(athletes) {
+        // Populate athlete select
+        const athleteSelect = document.getElementById('insightsAthlete');
+        if (athleteSelect) {
+          const sorted = [...athletes].sort((a, b) => {
+            const lastA = a.name.split(' ').pop().toLowerCase();
+            const lastB = b.name.split(' ').pop().toLowerCase();
+            return lastA.localeCompare(lastB);
+          });
+          athleteSelect.innerHTML = '<option value="">Choose athlete...</option>' +
+            sorted.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+        }
+
+        // Populate metric select
+        const metricSelect = document.getElementById('insightsMetric');
+        if (metricSelect) {
+          metricSelect.innerHTML = '<option value="">Choose metric...</option>' +
+            Object.entries(this.metrics).map(([id, name]) => `<option value="${id}">${name}</option>`).join('');
+        }
+      },
+
+      async loadInsights() {
+        const athleteId = document.getElementById('insightsAthlete').value;
+        const metricId = document.getElementById('insightsMetric').value;
+        const period = document.getElementById('insightsPeriod').value;
+        const display = document.getElementById('insightsDisplay');
+
+        if (!athleteId || !metricId) {
+          display.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Select athlete and metric to view insights</p>';
+          return;
+        }
+
+        try {
+          const athletes = await this.loadAthletes();
+          const assessments = await this.loadAssessments();
+          const athlete = athletes.find(a => a.id === athleteId);
+          const metricName = this.metrics[metricId];
+
+          // Get assessments for this athlete/metric
+          let data = assessments
+            .filter(a => a.athlete_id === athleteId && a.metric_id === parseInt(metricId))
+            .sort((a, b) => new Date(a.recorded_at) - new Date(b.recorded_at));
+
+          // Filter by period
+          if (period !== 'all') {
+            const days = parseInt(period);
+            const cutoff = new Date();
+            cutoff.setDate(cutoff.getDate() - days);
+            data = data.filter(a => new Date(a.recorded_at) >= cutoff);
+          }
+
+          if (data.length === 0) {
+            display.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">No data for this selection</p>';
+            return;
+          }
+
+          // Calculate stats
+          const values = data.map(a => parseFloat(a.value));
+          const current = values[values.length - 1];
+          const best = Math.max(...values);
+          const worst = Math.min(...values);
+          const avg = values.reduce((a, b) => a + b) / values.length;
+
+          // Determine trend (simple: current vs average)
+          let trend, trendColor, trendIcon;
+          if (current > avg) {
+            trend = 'Improving';
+            trendColor = '#4CAF50';
+            trendIcon = '📈';
+          } else if (current < avg) {
+            trend = 'Declining';
+            trendColor = '#F44336';
+            trendIcon = '📉';
+          } else {
+            trend = 'Stable';
+            trendColor = '#999';
+            trendIcon = '→';
+          }
+
+          // Display stats cards
+          display.innerHTML = `
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;">
+              <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center;">
+                <p style="margin: 0; color: #999; font-size: 12px; font-weight: bold;">CURRENT</p>
+                <p style="margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: #000;">${current}</p>
+              </div>
+              <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center;">
+                <p style="margin: 0; color: #999; font-size: 12px; font-weight: bold;">BEST</p>
+                <p style="margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: #F54A05;">${best}</p>
+              </div>
+              <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center;">
+                <p style="margin: 0; color: #999; font-size: 12px; font-weight: bold;">AVERAGE</p>
+                <p style="margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: #666;">${avg.toFixed(1)}</p>
+              </div>
+              <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center;">
+                <p style="margin: 0; color: #999; font-size: 12px; font-weight: bold;">TREND</p>
+                <p style="margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: ${trendColor};">${trendIcon} ${trend}</p>
+              </div>
+            </div>
+            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+              <p style="margin: 0 0 10px 0; color: #999; font-size: 12px;"><strong>${athlete.name}</strong> • ${metricName} • ${data.length} assessments</p>
+              <table style="width: 100%;">
+                <thead>
+                  <tr style="border-bottom: 1px solid #eee;">
+                    <th style="text-align: left; padding: 10px; color: #999; font-size: 12px;">Date</th>
+                    <th style="text-align: right; padding: 10px; color: #999; font-size: 12px;">Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${data.map(a => `
+                    <tr style="border-bottom: 1px solid #eee;">
+                      <td style="padding: 10px;">${new Date(a.recorded_at).toLocaleDateString()}</td>
+                      <td style="text-align: right; padding: 10px; font-weight: bold;">${a.value}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        } catch (e) {
+          console.error('Insights error:', e);
+          display.innerHTML = `<p style="color: red; padding: 20px;">Error: ${e.message}</p>`;
         }
       },
 
