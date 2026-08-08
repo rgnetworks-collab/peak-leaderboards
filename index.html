@@ -125,13 +125,13 @@
 
     <div class="container">
       <nav>
-        <button class="nav-btn active" onclick="app.section('dashboard', this)">Dashboard</button>
-        <button class="nav-btn" onclick="app.section('athletes', this)">Athletes</button>
-        <button class="nav-btn" onclick="app.section('assessments', this)">Assessments</button>
-        <button class="nav-btn" onclick="app.section('insights', this)">Insights</button>
-        <button class="nav-btn" onclick="app.section('history', this)">History</button>
-        <button class="nav-btn" onclick="app.section('metrics', this)">Metrics</button>
-        <button class="nav-btn" onclick="app.section('coaches', this)">Coaches</button>
+        <button class="nav-btn active" id="navDashboard" onclick="app.section('dashboard', this)">Dashboard</button>
+        <button class="nav-btn" id="navAthletes" onclick="app.section('athletes', this)">Athletes</button>
+        <button class="nav-btn" id="navAssessments" onclick="app.section('assessments', this)">Assessments</button>
+        <button class="nav-btn" id="navInsights" onclick="app.section('insights', this)">Insights</button>
+        <button class="nav-btn" id="navHistory" onclick="app.section('history', this)">History</button>
+        <button class="nav-btn" id="navMetrics" onclick="app.section('metrics', this)">Metrics</button>
+        <button class="nav-btn" id="navCoaches" onclick="app.section('coaches', this)">Coaches</button>
       </nav>
 
       <!-- Dashboard -->
@@ -194,40 +194,26 @@
           </tbody>
         </table>
 
-        <h2 style="margin-top: 50px;">Leaderboard Display Carousel</h2>
-        <div class="form-box">
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-            <div class="form-group">
-              <label>Select Metrics</label>
-              <div id="metricCheckboxes" style="max-height: 150px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 4px; background: #f9f9f9;"></div>
-            </div>
-            <div class="form-group">
-              <label>Program</label>
-              <select id="displayProgram" onchange="app.updateDisplay()">
-                <option value="">All Programs</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Timer (seconds)</label>
-              <input type="number" id="displayTimer" value="10" min="3" max="60" onchange="app.updateDisplay()">
-            </div>
-            <div class="form-group">
-              <label>&nbsp;</label>
-              <div style="display: flex; gap: 10px;">
-                <button id="displayPlayBtn" onclick="app.toggleDisplay()" style="flex: 1;">▶ Start</button>
-                <button onclick="app.fullscreenDisplay()" style="flex: 1;">⛶ Fullscreen</button>
-              </div>
-            </div>
+        <!-- Athlete Assessment View (hidden for coaches) -->
+        <div id="athleteAssessmentView" style="display: none;">
+          <h2>Your Recent Assessments</h2>
+          <div id="athleteRecentAssessments" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
           </div>
-        </div>
 
-        <div id="displayCarousel" style="background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 40px; text-align: center; min-height: 500px; display: flex; flex-direction: column; justify-content: center;">
-          <p style="color: #999; font-size: 18px;">Select metrics and click Start to begin carousel</p>
-        </div>
-
-        <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: center;">
-          <button onclick="app.displayPrevious()" style="width: 120px;">← Previous</button>
-          <button onclick="app.displayNext()" style="width: 120px;">Next →</button>
+          <h2>All Your Assessments</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Score</th>
+                <th>Date Tested</th>
+                <th>Recorded By</th>
+              </tr>
+            </thead>
+            <tbody id="athleteAssessmentsBody">
+              <tr><td colspan="4" class="empty">No assessments yet</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
       <div id="athletes" class="section">
@@ -344,30 +330,9 @@
 
       <!-- Insights -->
       <div id="insights" class="section">
-        <h2>Performance Insights</h2>
-        
+        <h2>Your Performance Insights</h2>
         <div class="form-box">
-          <div style="display: flex; gap: 15px; margin-bottom: 20px;">
-            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-              <input type="radio" name="insightsView" value="athlete" checked onchange="app.switchInsightsView('athlete')">
-              <span>Individual Athlete</span>
-            </label>
-            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-              <input type="radio" name="insightsView" value="program" onchange="app.switchInsightsView('program')">
-              <span>Entire Program</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Athlete View -->
-        <div id="athleteInsightsView" class="form-box">
           <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-            <div class="form-group">
-              <label>Select Athlete</label>
-              <select id="insightsAthlete" onchange="app.loadAthleteInsights()">
-                <option value="">Choose athlete...</option>
-              </select>
-            </div>
             <div class="form-group">
               <label>Select Metric</label>
               <select id="insightsMetric" onchange="app.loadAthleteInsights()">
@@ -386,35 +351,8 @@
           </div>
         </div>
 
-        <!-- Program View -->
-        <div id="programInsightsView" class="form-box" style="display: none;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-            <div class="form-group">
-              <label>Select Program</label>
-              <select id="insightsProgram" onchange="app.loadProgramInsights()">
-                <option value="">Choose program...</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Select Metric</label>
-              <select id="insightsProgramMetric" onchange="app.loadProgramInsights()">
-                <option value="">Choose metric...</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Time Period</label>
-              <select id="insightsProgramPeriod" onchange="app.loadProgramInsights()">
-                <option value="all">All Time</option>
-                <option value="30">Last 30 Days</option>
-                <option value="60">Last 60 Days</option>
-                <option value="90">Last 90 Days</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
         <div id="insightsDisplay" style="margin-top: 20px;">
-          <p style="text-align: center; color: #999; padding: 40px;">Select athlete/program and metric to view insights</p>
+          <p style="text-align: center; color: #999; padding: 40px;">Select a metric to view your trends</p>
         </div>
       </div>
 
@@ -627,6 +565,8 @@
     const app = {
       currentCoach: null,
       currentAthlete: null,
+      currentAthleteId: null, // For filtering athlete data
+      loginType: null, // 'coach' or 'athlete'
       editingId: null,
       metrics: {},
 
@@ -640,11 +580,14 @@
         
         if (coach) {
           this.currentCoach = coach;
+          this.loginType = 'coach';
           this.showApp();
         } else if (athlete) {
           this.currentAthlete = athlete;
+          this.loginType = 'athlete';
           this.showAthleteApp();
         } else {
+          this.loginType = null;
           this.showLogin();
         }
       },
@@ -716,6 +659,7 @@
           localStorage.setItem('peakCurrentCoach', name);
           localStorage.removeItem('peakCurrentAthlete');
           this.currentCoach = name;
+          this.loginType = 'coach';
           this.showApp();
         } catch (e) {
           err.textContent = 'Network error: ' + e.message;
@@ -744,6 +688,8 @@
           localStorage.setItem('peakCurrentAthlete', name);
           localStorage.removeItem('peakCurrentCoach');
           this.currentAthlete = name;
+          this.currentAthleteId = athletes[0].id; // Store ID for data filtering
+          this.loginType = 'athlete';
           this.showAthleteApp();
         } catch (e) {
           err.textContent = 'Error: ' + e.message;
@@ -755,6 +701,8 @@
         localStorage.removeItem('peakCurrentAthlete');
         this.currentCoach = null;
         this.currentAthlete = null;
+        this.currentAthleteId = null;
+        this.loginType = null;
         this.showLogin();
       },
 
@@ -768,11 +716,10 @@
 
       showAthleteApp() {
         document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('appScreen').classList.add('hidden');
-        document.getElementById('athleteScreen').classList.remove('hidden');
-        document.getElementById('athleteDisplay').textContent = this.currentAthlete;
-        this.loadMetrics();
-        this.renderAthleteLeaderboard();
+        document.getElementById('appScreen').classList.remove('hidden');
+        document.getElementById('athleteScreen').classList.add('hidden');
+        document.getElementById('coachDisplay').textContent = this.currentAthlete + ' (Athlete)';
+        this.loadData();
       },
 
       section(name, btn) {
@@ -782,19 +729,224 @@
         btn.classList.add('active');
       },
 
+      manageNavForLoginType() {
+        if (this.loginType === 'athlete') {
+          // Hide coach tabs
+          document.getElementById('navAthletes').style.display = 'none';
+          document.getElementById('navAssessments').style.display = 'none';
+          document.getElementById('navHistory').style.display = 'none';
+          document.getElementById('navMetrics').style.display = 'none';
+          document.getElementById('navCoaches').style.display = 'none';
+          
+          // Hide coach dashboard content, show athlete content
+          const coachDashboard = document.querySelector('#dashboard > div:nth-child(2)');
+          const coachLeaderboards = document.querySelector('#dashboard > h2:nth-child(3)');
+          const coachFilter = document.querySelector('#dashboard .filter-box');
+          const coachTable = document.querySelector('#dashboard > table');
+          
+          if (coachDashboard) coachDashboard.style.display = 'none';
+          if (coachLeaderboards) coachLeaderboards.style.display = 'none';
+          if (coachFilter) coachFilter.style.display = 'none';
+          if (coachTable) coachTable.style.display = 'none';
+          
+          const athleteView = document.getElementById('athleteAssessmentView');
+          if (athleteView) athleteView.style.display = 'block';
+        } else {
+          // Show coach tabs
+          document.getElementById('navAthletes').style.display = 'inline-block';
+          document.getElementById('navAssessments').style.display = 'inline-block';
+          document.getElementById('navHistory').style.display = 'inline-block';
+          document.getElementById('navMetrics').style.display = 'inline-block';
+          document.getElementById('navCoaches').style.display = 'inline-block';
+          
+          // Show coach content
+          const coachDashboard = document.querySelector('#dashboard > div:nth-child(2)');
+          const coachLeaderboards = document.querySelector('#dashboard > h2:nth-child(3)');
+          const coachFilter = document.querySelector('#dashboard .filter-box');
+          const coachTable = document.querySelector('#dashboard > table');
+          
+          if (coachDashboard) coachDashboard.style.display = 'grid';
+          if (coachLeaderboards) coachLeaderboards.style.display = 'block';
+          if (coachFilter) coachFilter.style.display = 'flex';
+          if (coachTable) coachTable.style.display = 'table';
+          
+          const athleteView = document.getElementById('athleteAssessmentView');
+          if (athleteView) athleteView.style.display = 'none';
+        }
+      },
+
+      async renderAthleteAssessments() {
+        try {
+          const assessments = await this.loadAssessments();
+          const athleteAssessments = assessments.filter(a => a.athlete_id === this.currentAthleteId);
+          
+          if (athleteAssessments.length === 0) {
+            document.getElementById('athleteRecentAssessments').innerHTML = '<p style="color: #999;">No assessments yet</p>';
+            document.getElementById('athleteAssessmentsBody').innerHTML = '<tr><td colspan="4" class="empty">No assessments yet</td></tr>';
+            return;
+          }
+
+          // Get recent (last 3)
+          const recent = athleteAssessments.sort((a, b) => new Date(b.recorded_at) - new Date(a.recorded_at)).slice(0, 3);
+          
+          document.getElementById('athleteRecentAssessments').innerHTML = recent.map(a => `
+            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center;">
+              <p style="margin: 0; color: #999; font-size: 12px; font-weight: bold;">${this.metrics[a.metric_id] || 'Unknown'}</p>
+              <p style="margin: 8px 0 0 0; font-size: 32px; font-weight: bold; color: #F54A05;">${a.value}</p>
+              <p style="margin: 8px 0 0 0; color: #999; font-size: 12px;">${new Date(a.recorded_at).toLocaleDateString()}</p>
+            </div>
+          `).join('');
+
+          // Show all assessments in table
+          const sorted = [...athleteAssessments].sort((a, b) => new Date(b.recorded_at) - new Date(a.recorded_at));
+          document.getElementById('athleteAssessmentsBody').innerHTML = sorted.map(a => `
+            <tr>
+              <td>${this.metrics[a.metric_id] || 'Unknown'}</td>
+              <td style="font-weight: bold;">${a.value}</td>
+              <td>${new Date(a.recorded_at).toLocaleDateString()}</td>
+              <td>${a.recorded_by}</td>
+            </tr>
+          `).join('');
+        } catch (e) {
+          console.error('Error rendering athlete assessments:', e);
+        }
+      },
+
+      populateAthleteInsightsMetrics() {
+        try {
+          const assessments = this.loadAssessments ? (this.assessments || []) : [];
+          const athleteMetrics = {};
+          
+          assessments.forEach(a => {
+            if (a.athlete_id === this.currentAthleteId && this.metrics[a.metric_id]) {
+              athleteMetrics[a.metric_id] = this.metrics[a.metric_id];
+            }
+          });
+
+          const metricSelect = document.getElementById('insightsMetric');
+          if (metricSelect) {
+            metricSelect.innerHTML = '<option value="">Choose metric...</option>' +
+              Object.entries(athleteMetrics).map(([id, name]) => `<option value="${id}">${name}</option>`).join('');
+          }
+        } catch (e) {
+          console.error('Error populating metrics:', e);
+        }
+      },
+
+      async loadAthleteInsights() {
+        const metricId = document.getElementById('insightsMetric').value;
+        const period = document.getElementById('insightsPeriod').value;
+        const display = document.getElementById('insightsDisplay');
+
+        if (!metricId) {
+          display.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Select a metric to view your trends</p>';
+          return;
+        }
+
+        try {
+          const assessments = await this.loadAssessments();
+          const metricName = this.metrics[metricId];
+
+          let data = assessments
+            .filter(a => a.athlete_id === this.currentAthleteId && a.metric_id === parseInt(metricId))
+            .sort((a, b) => new Date(a.recorded_at) - new Date(b.recorded_at));
+
+          if (period !== 'all') {
+            const days = parseInt(period);
+            const cutoff = new Date();
+            cutoff.setDate(cutoff.getDate() - days);
+            data = data.filter(a => new Date(a.recorded_at) >= cutoff);
+          }
+
+          if (data.length === 0) {
+            display.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">No data for this period</p>';
+            return;
+          }
+
+          const values = data.map(a => parseFloat(a.value));
+          const current = values[values.length - 1];
+          const best = Math.max(...values);
+          const avg = values.reduce((a, b) => a + b) / values.length;
+          
+          let trend, trendColor, trendIcon;
+          if (current > avg) {
+            trend = 'Improving';
+            trendColor = '#4CAF50';
+            trendIcon = '📈';
+          } else if (current < avg) {
+            trend = 'Declining';
+            trendColor = '#F44336';
+            trendIcon = '📉';
+          } else {
+            trend = 'Stable';
+            trendColor = '#999';
+            trendIcon = '→';
+          }
+
+          display.innerHTML = `
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;">
+              <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center;">
+                <p style="margin: 0; color: #999; font-size: 12px; font-weight: bold;">CURRENT</p>
+                <p style="margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: #000;">${current}</p>
+              </div>
+              <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center;">
+                <p style="margin: 0; color: #999; font-size: 12px; font-weight: bold;">BEST</p>
+                <p style="margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: #F54A05;">${best}</p>
+              </div>
+              <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center;">
+                <p style="margin: 0; color: #999; font-size: 12px; font-weight: bold;">AVERAGE</p>
+                <p style="margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: #666;">${avg.toFixed(1)}</p>
+              </div>
+              <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center;">
+                <p style="margin: 0; color: #999; font-size: 12px; font-weight: bold;">TREND</p>
+                <p style="margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: ${trendColor};">${trendIcon} ${trend}</p>
+              </div>
+            </div>
+            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+              <p style="margin: 0 0 10px 0; color: #999; font-size: 12px;"><strong>${metricName}</strong> • ${data.length} tests</p>
+              <table style="width: 100%;">
+                <thead>
+                  <tr style="border-bottom: 1px solid #eee;">
+                    <th style="text-align: left; padding: 10px; color: #999; font-size: 12px;">Date</th>
+                    <th style="text-align: right; padding: 10px; color: #999; font-size: 12px;">Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${data.map(a => `
+                    <tr style="border-bottom: 1px solid #eee;">
+                      <td style="padding: 10px;">${new Date(a.recorded_at).toLocaleDateString()}</td>
+                      <td style="text-align: right; padding: 10px; font-weight: bold;">${a.value}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        } catch (e) {
+          console.error('Insights error:', e);
+          display.innerHTML = `<p style="color: red; padding: 20px;">Error: ${e.message}</p>`;
+        }
+      },
+
       async loadData() {
         await this.loadMetrics();
         const athletes = await this.loadAthletes();
         await this.loadAssessments();
-        this.renderLeaderboard();
-        this.renderAthletes();
-        this.renderAssessments();
-        this.renderHistory();
-        this.renderMetrics();
-        this.renderCoaches();
-        this.populateInsightsSelects(athletes);
-        this.initDisplay(athletes);
-        this.updateStats();
+        
+        this.manageNavForLoginType();
+        
+        if (this.loginType === 'athlete') {
+          this.renderAthleteAssessments();
+          this.populateAthleteInsightsMetrics();
+        } else {
+          this.renderLeaderboard();
+          this.renderAthletes();
+          this.renderAssessments();
+          this.renderHistory();
+          this.renderMetrics();
+          this.renderCoaches();
+          this.updateStats();
+        }
       },
 
       async loadMetrics() {
@@ -841,7 +993,9 @@
           const res = await fetch(`${SUPABASE_URL}/rest/v1/assessments`, {
             headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY }
           });
-          return await res.json();
+          const data = await res.json();
+          this.assessments = data; // Cache for use in other functions
+          return data;
         } catch (e) {
           console.error('Error loading assessments:', e);
           return [];
@@ -933,12 +1087,7 @@
           
           // Populate athlete selector in assessments section
           const sel = document.getElementById('assAthlete');
-          const sortedAthletes = [...athletes].sort((a, b) => {
-            const lastA = a.name.split(' ').pop().toLowerCase();
-            const lastB = b.name.split(' ').pop().toLowerCase();
-            return lastA.localeCompare(lastB);
-          });
-          sel.innerHTML = '<option value="">Select athlete...</option>' + sortedAthletes.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+          sel.innerHTML = '<option value="">Select athlete...</option>' + athletes.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
           
           // Initial render with filters
           this.filterAndSortAthletes();
@@ -1696,413 +1845,6 @@
           this.renderLeaderboard();
         } catch (e) {
           alert('Error: ' + e.message);
-        }
-      },
-
-      displayCarouselIndex: 0,
-      displayCarouselData: [],
-      displayCarouselRunning: false,
-      displayCarouselInterval: null,
-
-      initDisplay(athletes) {
-        const metricsDiv = document.getElementById('metricCheckboxes');
-        if (metricsDiv) {
-          metricsDiv.innerHTML = Object.entries(this.metrics).map(([id, name]) => `
-            <label style="display: flex; align-items: center; gap: 8px; padding: 5px 0; cursor: pointer;">
-              <input type="checkbox" value="${id}" onchange="app.updateDisplay()">
-              <span style="font-size: 14px;">${name}</span>
-            </label>
-          `).join('');
-        }
-
-        const programSelect = document.getElementById('displayProgram');
-        if (programSelect) {
-          const programs = [...new Set(athletes.map(a => a.program))].sort();
-          programSelect.innerHTML = '<option value="">All Programs</option>' +
-            programs.map(p => `<option value="${p}">${p}</option>`).join('');
-        }
-      },
-
-      async updateDisplay() {
-        const selectedMetrics = Array.from(document.querySelectorAll('#metricCheckboxes input:checked')).map(cb => cb.value);
-        const program = document.getElementById('displayProgram').value;
-
-        if (selectedMetrics.length === 0) {
-          document.getElementById('displayCarousel').innerHTML = '<p style="color: #999; font-size: 18px;">Select at least one metric to display</p>';
-          return;
-        }
-
-        try {
-          const athletes = await this.loadAthletes();
-          const assessments = await this.loadAssessments();
-
-          this.displayCarouselData = [];
-
-          selectedMetrics.forEach(metricId => {
-            const metricName = this.metrics[metricId];
-            if (!metricName) return;
-
-            const relevant = assessments.filter(a => a.metric_id === parseInt(metricId));
-            const latest = {};
-
-            relevant.forEach(a => {
-              if (!latest[a.athlete_id] || new Date(a.recorded_at) > new Date(latest[a.athlete_id].recorded_at)) {
-                latest[a.athlete_id] = a;
-              }
-            });
-
-            let ranked = Object.values(latest)
-              .map(a => ({
-                score: a.value,
-                athlete: athletes.find(ath => ath.id === a.athlete_id)
-              }))
-              .filter(r => r.athlete && (!program || r.athlete.program === program))
-              .sort((a, b) => b.score - a.score)
-              .slice(0, 5);
-
-            if (ranked.length > 0) {
-              this.displayCarouselData.push({
-                metric: metricName,
-                data: ranked
-              });
-            }
-          });
-
-          this.displayCarouselIndex = 0;
-          this.renderCarouselSlide();
-        } catch (e) {
-          console.error('Display error:', e);
-        }
-      },
-
-      renderCarouselSlide() {
-        if (this.displayCarouselData.length === 0) return;
-
-        const slide = this.displayCarouselData[this.displayCarouselIndex];
-        const carousel = document.getElementById('displayCarousel');
-        const timer = parseInt(document.getElementById('displayTimer').value);
-
-        carousel.innerHTML = `
-          <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
-            <h1 style="margin: 0 0 30px 0; color: #F54A05; font-size: 48px; font-weight: bold;">${slide.metric}</h1>
-            
-            <div style="display: grid; gap: 20px; margin-bottom: 40px;">
-              ${slide.data.map((athlete, idx) => `
-                <div style="display: grid; grid-template-columns: 60px 1fr 200px; gap: 30px; align-items: center; padding: 20px; background: #f9f9f9; border-radius: 8px;">
-                  <div style="text-align: center;">
-                    <div style="font-size: 48px; font-weight: bold; color: #F54A05;">#${idx + 1}</div>
-                  </div>
-                  <div style="text-align: left;">
-                    <div style="font-size: 32px; font-weight: bold; color: #000;">${athlete.athlete.name}</div>
-                    <div style="font-size: 16px; color: #666;">${athlete.athlete.program}</div>
-                  </div>
-                  <div style="text-align: right;">
-                    <div style="font-size: 40px; font-weight: bold; color: #000;">${athlete.score}</div>
-                  </div>
-                </div>
-              `).join('')}
-            </div>
-
-            <div style="font-size: 18px; color: #999;">
-              ${this.displayCarouselIndex + 1} of ${this.displayCarouselData.length} • Next in <span id="carouselTimer">${timer}</span>s
-            </div>
-          </div>
-        `;
-
-        if (this.displayCarouselRunning) {
-          this.startCarouselCountdown(timer);
-        }
-      },
-
-      startCarouselCountdown(duration) {
-        let remaining = duration;
-        const timerEl = document.getElementById('carouselTimer');
-        
-        if (this.displayCarouselInterval) clearInterval(this.displayCarouselInterval);
-
-        this.displayCarouselInterval = setInterval(() => {
-          remaining--;
-          if (timerEl) timerEl.textContent = remaining;
-
-          if (remaining <= 0) {
-            clearInterval(this.displayCarouselInterval);
-            this.displayNext();
-          }
-        }, 1000);
-      },
-
-      toggleDisplay() {
-        const btn = document.getElementById('displayPlayBtn');
-        
-        if (this.displayCarouselRunning) {
-          this.displayCarouselRunning = false;
-          if (this.displayCarouselInterval) clearInterval(this.displayCarouselInterval);
-          btn.textContent = '▶ Start';
-        } else {
-          if (this.displayCarouselData.length === 0) {
-            alert('No data to display. Select metrics and program first.');
-            return;
-          }
-          this.displayCarouselRunning = true;
-          btn.textContent = '⏸ Pause';
-          this.renderCarouselSlide();
-        }
-      },
-
-      displayNext() {
-        if (this.displayCarouselData.length === 0) return;
-        this.displayCarouselIndex = (this.displayCarouselIndex + 1) % this.displayCarouselData.length;
-        this.renderCarouselSlide();
-      },
-
-      displayPrevious() {
-        if (this.displayCarouselData.length === 0) return;
-        this.displayCarouselIndex = (this.displayCarouselIndex - 1 + this.displayCarouselData.length) % this.displayCarouselData.length;
-        this.renderCarouselSlide();
-      },
-
-      fullscreenDisplay() {
-        const carousel = document.getElementById('displayCarousel');
-        if (carousel.requestFullscreen) {
-          carousel.requestFullscreen();
-        } else if (carousel.webkitRequestFullscreen) {
-          carousel.webkitRequestFullscreen();
-        }
-      },
-
-      populateInsightsSelects(athletes) {
-        // Populate athlete select
-        const athleteSelect = document.getElementById('insightsAthlete');
-        if (athleteSelect) {
-          const sorted = [...athletes].sort((a, b) => {
-            const lastA = a.name.split(' ').pop().toLowerCase();
-            const lastB = b.name.split(' ').pop().toLowerCase();
-            return lastA.localeCompare(lastB);
-          });
-          athleteSelect.innerHTML = '<option value="">Choose athlete...</option>' +
-            sorted.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
-        }
-
-        // Populate program select
-        const programSelect = document.getElementById('insightsProgram');
-        if (programSelect) {
-          const programs = [...new Set(athletes.map(a => a.program))].sort();
-          programSelect.innerHTML = '<option value="">Choose program...</option>' +
-            programs.map(p => `<option value="${p}">${p}</option>`).join('');
-        }
-
-        // Populate metric selects
-        const metricSelect = document.getElementById('insightsMetric');
-        const programMetricSelect = document.getElementById('insightsProgramMetric');
-        const metricOptions = '<option value="">Choose metric...</option>' +
-          Object.entries(this.metrics).map(([id, name]) => `<option value="${id}">${name}</option>`).join('');
-        if (metricSelect) metricSelect.innerHTML = metricOptions;
-        if (programMetricSelect) programMetricSelect.innerHTML = metricOptions;
-      },
-
-      switchInsightsView(view) {
-        const athleteView = document.getElementById('athleteInsightsView');
-        const programView = document.getElementById('programInsightsView');
-        const display = document.getElementById('insightsDisplay');
-
-        if (view === 'athlete') {
-          athleteView.style.display = 'block';
-          programView.style.display = 'none';
-        } else {
-          athleteView.style.display = 'none';
-          programView.style.display = 'block';
-        }
-        display.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Select athlete/program and metric to view insights</p>';
-      },
-
-      async loadAthleteInsights() {
-        const athleteId = document.getElementById('insightsAthlete').value;
-        const metricId = document.getElementById('insightsMetric').value;
-        const period = document.getElementById('insightsPeriod').value;
-        const display = document.getElementById('insightsDisplay');
-
-        if (!athleteId || !metricId) {
-          display.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Select athlete and metric to view insights</p>';
-          return;
-        }
-
-        try {
-          const athletes = await this.loadAthletes();
-          const assessments = await this.loadAssessments();
-          const athlete = athletes.find(a => a.id === athleteId);
-          const metricName = this.metrics[metricId];
-
-          let data = assessments
-            .filter(a => a.athlete_id === athleteId && a.metric_id === parseInt(metricId))
-            .sort((a, b) => new Date(a.recorded_at) - new Date(b.recorded_at));
-
-          if (period !== 'all') {
-            const days = parseInt(period);
-            const cutoff = new Date();
-            cutoff.setDate(cutoff.getDate() - days);
-            data = data.filter(a => new Date(a.recorded_at) >= cutoff);
-          }
-
-          if (data.length === 0) {
-            display.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">No data for this selection</p>';
-            return;
-          }
-
-          const values = data.map(a => parseFloat(a.value));
-          const current = values[values.length - 1];
-          const best = Math.max(...values);
-          const avg = values.reduce((a, b) => a + b) / values.length;
-          let trend, trendColor, trendIcon;
-          
-          if (current > avg) {
-            trend = 'Improving';
-            trendColor = '#4CAF50';
-            trendIcon = '📈';
-          } else if (current < avg) {
-            trend = 'Declining';
-            trendColor = '#F44336';
-            trendIcon = '📉';
-          } else {
-            trend = 'Stable';
-            trendColor = '#999';
-            trendIcon = '→';
-          }
-
-          display.innerHTML = `
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;">
-              <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center;">
-                <p style="margin: 0; color: #999; font-size: 12px; font-weight: bold;">CURRENT</p>
-                <p style="margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: #000;">${current}</p>
-              </div>
-              <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center;">
-                <p style="margin: 0; color: #999; font-size: 12px; font-weight: bold;">BEST</p>
-                <p style="margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: #F54A05;">${best}</p>
-              </div>
-              <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center;">
-                <p style="margin: 0; color: #999; font-size: 12px; font-weight: bold;">AVERAGE</p>
-                <p style="margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: #666;">${avg.toFixed(1)}</p>
-              </div>
-              <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center;">
-                <p style="margin: 0; color: #999; font-size: 12px; font-weight: bold;">TREND</p>
-                <p style="margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: ${trendColor};">${trendIcon} ${trend}</p>
-              </div>
-            </div>
-            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-              <p style="margin: 0 0 10px 0; color: #999; font-size: 12px;"><strong>${athlete.name}</strong> • ${metricName} • ${data.length} assessments</p>
-              <table style="width: 100%;">
-                <thead>
-                  <tr style="border-bottom: 1px solid #eee;">
-                    <th style="text-align: left; padding: 10px; color: #999; font-size: 12px;">Date</th>
-                    <th style="text-align: right; padding: 10px; color: #999; font-size: 12px;">Value</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${data.map(a => `
-                    <tr style="border-bottom: 1px solid #eee;">
-                      <td style="padding: 10px;">${new Date(a.recorded_at).toLocaleDateString()}</td>
-                      <td style="text-align: right; padding: 10px; font-weight: bold;">${a.value}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-          `;
-        } catch (e) {
-          console.error('Insights error:', e);
-          display.innerHTML = `<p style="color: red; padding: 20px;">Error: ${e.message}</p>`;
-        }
-      },
-
-      async loadProgramInsights() {
-        const program = document.getElementById('insightsProgram').value;
-        const metricId = document.getElementById('insightsProgramMetric').value;
-        const period = document.getElementById('insightsProgramPeriod').value;
-        const display = document.getElementById('insightsDisplay');
-
-        if (!program || !metricId) {
-          display.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Select program and metric to view insights</p>';
-          return;
-        }
-
-        try {
-          const athletes = await this.loadAthletes();
-          const assessments = await this.loadAssessments();
-          const programAthletes = athletes.filter(a => a.program === program);
-          const metricName = this.metrics[metricId];
-
-          let data = assessments
-            .filter(a => programAthletes.some(pa => pa.id === a.athlete_id) && a.metric_id === parseInt(metricId))
-            .sort((a, b) => new Date(a.recorded_at) - new Date(b.recorded_at));
-
-          if (period !== 'all') {
-            const days = parseInt(period);
-            const cutoff = new Date();
-            cutoff.setDate(cutoff.getDate() - days);
-            data = data.filter(a => new Date(a.recorded_at) >= cutoff);
-          }
-
-          if (data.length === 0) {
-            display.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">No data for this selection</p>';
-            return;
-          }
-
-          const values = data.map(a => parseFloat(a.value));
-          const latest = values[values.length - 1];
-          const best = Math.max(...values);
-          const worst = Math.min(...values);
-          const avg = values.reduce((a, b) => a + b) / values.length;
-
-          display.innerHTML = `
-            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin-bottom: 20px;">
-              <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center;">
-                <p style="margin: 0; color: #999; font-size: 12px; font-weight: bold;">ATHLETES</p>
-                <p style="margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: #000;">${programAthletes.length}</p>
-              </div>
-              <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center;">
-                <p style="margin: 0; color: #999; font-size: 12px; font-weight: bold;">LATEST</p>
-                <p style="margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: #000;">${latest}</p>
-              </div>
-              <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center;">
-                <p style="margin: 0; color: #999; font-size: 12px; font-weight: bold;">BEST</p>
-                <p style="margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: #F54A05;">${best}</p>
-              </div>
-              <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center;">
-                <p style="margin: 0; color: #999; font-size: 12px; font-weight: bold;">AVERAGE</p>
-                <p style="margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: #666;">${avg.toFixed(1)}</p>
-              </div>
-              <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center;">
-                <p style="margin: 0; color: #999; font-size: 12px; font-weight: bold;">ASSESSMENTS</p>
-                <p style="margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: #000;">${data.length}</p>
-              </div>
-            </div>
-            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-              <p style="margin: 0 0 10px 0; color: #999; font-size: 12px;"><strong>${program}</strong> • ${metricName}</p>
-              <table style="width: 100%;">
-                <thead>
-                  <tr style="border-bottom: 1px solid #eee;">
-                    <th style="text-align: left; padding: 10px; color: #999; font-size: 12px;">Date</th>
-                    <th style="text-align: left; padding: 10px; color: #999; font-size: 12px;">Athlete</th>
-                    <th style="text-align: right; padding: 10px; color: #999; font-size: 12px;">Value</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${data.reverse().map(a => {
-                    const athlete = athletes.find(at => at.id === a.athlete_id);
-                    return `
-                      <tr style="border-bottom: 1px solid #eee;">
-                        <td style="padding: 10px;">${new Date(a.recorded_at).toLocaleDateString()}</td>
-                        <td style="padding: 10px;">${athlete?.name || 'Unknown'}</td>
-                        <td style="text-align: right; padding: 10px; font-weight: bold;">${a.value}</td>
-                      </tr>
-                    `;
-                  }).join('')}
-                </tbody>
-              </table>
-            </div>
-          `;
-        } catch (e) {
-          console.error('Program insights error:', e);
-          display.innerHTML = `<p style="color: red; padding: 20px;">Error: ${e.message}</p>`;
         }
       },
 
