@@ -126,6 +126,7 @@
     <div class="container">
       <nav>
         <button class="nav-btn active" onclick="app.section('dashboard', this)">Dashboard</button>
+        <button class="nav-btn" onclick="app.section('myprofile', this)">My Profile</button>
         <button class="nav-btn" onclick="app.section('athletes', this)">Athletes</button>
         <button class="nav-btn" onclick="app.section('assessments', this)">Assessments</button>
         <button class="nav-btn" onclick="app.section('history', this)">History</button>
@@ -192,6 +193,116 @@
             <tr><td colspan="4" class="empty">Select a metric to view leaderboard</td></tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- My Profile (Athlete + Coach) -->
+      <div id="myprofile" class="section">
+        <h2>My Profile</h2>
+        
+        <!-- ATHLETE PROFILE SETUP -->
+        <div id="athleteProfileSetup" class="hidden">
+          <div class="form-box">
+            <h3>Complete Your Profile</h3>
+            <p style="color: #666; margin-bottom: 20px;">Help coaches and college recruiters understand your training and lifestyle.</p>
+            
+            <div class="form-group">
+              <label>Diet & Nutrition Pattern</label>
+              <textarea id="profileDietPattern" placeholder="e.g., Balanced diet, 3 meals daily, high protein" rows="2"></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label>Average Sleep Hours Per Night</label>
+              <input type="number" id="profileSleepHours" placeholder="7.5" min="0" max="12" step="0.5">
+            </div>
+            
+            <div class="form-group">
+              <label>Supplements Taken</label>
+              <textarea id="profileSupplements" placeholder="e.g., Protein powder, multivitamin, creatine" rows="2"></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label>Sports Played</label>
+              <textarea id="profileSports" placeholder="e.g., Basketball, Track & Field" rows="2"></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label>Solo Workouts Per Week</label>
+              <input type="number" id="profileSoloWorkouts" placeholder="3" min="0" max="7">
+            </div>
+            
+            <div class="form-group">
+              <label>Team Workouts Per Week</label>
+              <input type="number" id="profileTeamWorkouts" placeholder="5" min="0" max="7">
+            </div>
+            
+            <div class="form-group">
+              <label>Additional Training Notes</label>
+              <textarea id="profileNotes" placeholder="Any other relevant info coaches should know" rows="3"></textarea>
+            </div>
+            
+            <button onclick="app.saveAthleteProfile()" style="width: 100%; background: #F54A05;">Save Profile</button>
+            <div id="profileMsg" style="margin-top: 10px;"></div>
+          </div>
+        </div>
+
+        <!-- COACH PROFILE MANAGEMENT -->
+        <div id="coachProfileManagement" class="hidden">
+          <h3>Athlete Profiles & Export</h3>
+          <div class="filter-box">
+            <div class="form-group">
+              <label>Select Athlete</label>
+              <select id="profileCoachAthleteSelect" onchange="app.loadAthleteProfileForCuration()">
+                <option value="">Choose athlete...</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="athleteProfileDisplay" class="hidden">
+            <div class="form-box">
+              <h3 id="profileAthleteTitle">Athlete Profile</h3>
+              
+              <div style="background: #f9f9f9; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                  <div><strong>Sport(s):</strong> <span id="dispSports">—</span></div>
+                  <div><strong>Avg Sleep:</strong> <span id="dispSleep">—</span> hours</div>
+                  <div><strong>Solo Workouts:</strong> <span id="dispSolo">—</span>/week</div>
+                  <div><strong>Team Workouts:</strong> <span id="dispTeam">—</span>/week</div>
+                </div>
+                <div style="margin-top: 10px;"><strong>Diet:</strong> <span id="dispDiet">—</span></div>
+                <div><strong>Supplements:</strong> <span id="dispSupp">—</span></div>
+              </div>
+
+              <h4>Curate for College Coaches</h4>
+              <p style="color: #666; font-size: 12px; margin-bottom: 15px;">Select top 3-5 metrics to highlight and add a growth story.</p>
+              
+              <div class="form-group">
+                <label>Select Top Metrics to Highlight</label>
+                <div id="metricsCheckboxes" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; max-height: 200px; overflow-y: auto; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"></div>
+              </div>
+
+              <div class="form-group">
+                <label>Growth Story (optional)</label>
+                <textarea id="curatedGrowthStory" placeholder="e.g., Vertical improved 4 inches over 6 months | 40-time dropped 0.3 seconds | Squat increased 50 lbs" rows="2"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>Training Timeline (auto-filled)</label>
+                <textarea id="curatedTimeline" placeholder="Will auto-fill based on assessment history" rows="2" disabled></textarea>
+              </div>
+
+              <button onclick="app.saveCuration()" style="width: 100%; background: #F54A05; margin-bottom: 10px;">Save Curation</button>
+              <button onclick="app.exportProfilePDF()" style="width: 100%; background: #666;">Export as PDF</button>
+              <div id="curatorMsg" style="margin-top: 10px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NO PROFILE MESSAGE -->
+        <div id="noProfileMessage" class="hidden">
+          <div class="empty">
+            <p>No profile data loaded. Please ensure you're logged in correctly.</p>
+          </div>
+        </div>
       </div>
 
       <!-- Athletes -->
@@ -682,6 +793,7 @@
         this.renderMetrics();
         this.renderCoaches();
         this.updateStats();
+        this.initProfileTab();
       },
 
       async loadMetrics() {
@@ -1774,6 +1886,292 @@
           statusEl.style.color = 'red';
         }
       }
+    },
+
+    // PHASE 1: ATHLETE PROFILES & EXPORTS
+    initProfileTab() {
+      if (this.loginType === 'athlete') {
+        document.getElementById('athleteProfileSetup').classList.remove('hidden');
+        document.getElementById('coachProfileManagement').classList.add('hidden');
+      } else if (this.loginType === 'coach') {
+        document.getElementById('athleteProfileSetup').classList.add('hidden');
+        document.getElementById('coachProfileManagement').classList.remove('hidden');
+        this.populateCoachProfileAthleteSelect();
+      }
+    },
+
+    async saveAthleteProfile() {
+      if (!this.currentAthleteId) {
+        alert('No athlete logged in');
+        return;
+      }
+
+      const profile = {
+        athlete_id: this.currentAthleteId,
+        diet_pattern: document.getElementById('profileDietPattern').value || null,
+        avg_sleep_hours: parseFloat(document.getElementById('profileSleepHours').value) || null,
+        supplements: document.getElementById('profileSupplements').value || null,
+        sports_played: document.getElementById('profileSports').value || null,
+        solo_workouts_per_week: parseInt(document.getElementById('profileSoloWorkouts').value) || null,
+        team_workouts_per_week: parseInt(document.getElementById('profileTeamWorkouts').value) || null,
+        training_notes: document.getElementById('profileNotes').value || null
+      };
+
+      try {
+        const response = await fetch(`${this.supabaseUrl}/rest/v1/athlete_profiles?athlete_id=eq.${this.currentAthleteId}`, {
+          method: 'GET',
+          headers: {
+            'apikey': this.supabaseKey,
+            'Authorization': `Bearer ${this.supabaseKey}`
+          }
+        });
+
+        const existing = await response.json();
+        
+        if (existing.length > 0) {
+          // Update
+          await fetch(`${this.supabaseUrl}/rest/v1/athlete_profiles?id=eq.${existing[0].id}`, {
+            method: 'PATCH',
+            headers: {
+              'apikey': this.supabaseKey,
+              'Authorization': `Bearer ${this.supabaseKey}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(profile)
+          });
+        } else {
+          // Insert
+          await fetch(`${this.supabaseUrl}/rest/v1/athlete_profiles`, {
+            method: 'POST',
+            headers: {
+              'apikey': this.supabaseKey,
+              'Authorization': `Bearer ${this.supabaseKey}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(profile)
+          });
+        }
+
+        const msg = document.getElementById('profileMsg');
+        msg.textContent = '✓ Profile saved successfully!';
+        msg.style.color = 'green';
+        msg.style.backgroundColor = '#e8f5e9';
+        msg.style.padding = '10px';
+        msg.style.borderRadius = '4px';
+      } catch (e) {
+        const msg = document.getElementById('profileMsg');
+        msg.textContent = `Error: ${e.message}`;
+        msg.style.color = 'red';
+      }
+    },
+
+    populateCoachProfileAthleteSelect() {
+      const select = document.getElementById('profileCoachAthleteSelect');
+      select.innerHTML = '<option value="">Choose athlete...</option>';
+      
+      this.athletes.forEach(athlete => {
+        const option = document.createElement('option');
+        option.value = athlete.id;
+        option.textContent = athlete.name;
+        select.appendChild(option);
+      });
+    },
+
+    async loadAthleteProfileForCuration() {
+      const athleteId = document.getElementById('profileCoachAthleteSelect').value;
+      if (!athleteId) {
+        document.getElementById('athleteProfileDisplay').classList.add('hidden');
+        return;
+      }
+
+      try {
+        const profileRes = await fetch(`${this.supabaseUrl}/rest/v1/athlete_profiles?athlete_id=eq.${athleteId}`, {
+          headers: {
+            'apikey': this.supabaseKey,
+            'Authorization': `Bearer ${this.supabaseKey}`
+          }
+        });
+        const profileData = await profileRes.json();
+        const profile = profileData[0] || {};
+
+        const athlete = this.athletes.find(a => a.id === athleteId);
+        document.getElementById('profileAthleteTitle').textContent = `${athlete.name} - Profile`;
+        document.getElementById('dispSports').textContent = profile.sports_played || '—';
+        document.getElementById('dispSleep').textContent = profile.avg_sleep_hours || '—';
+        document.getElementById('dispSolo').textContent = profile.solo_workouts_per_week || '—';
+        document.getElementById('dispTeam').textContent = profile.team_workouts_per_week || '—';
+        document.getElementById('dispDiet').textContent = profile.diet_pattern || '—';
+        document.getElementById('dispSupp').textContent = profile.supplements || '—';
+
+        this.populateMetricsCheckboxes(athleteId);
+        document.getElementById('athleteProfileDisplay').classList.remove('hidden');
+      } catch (e) {
+        console.error('Error loading profile:', e);
+      }
+    },
+
+    populateMetricsCheckboxes(athleteId) {
+      const container = document.getElementById('metricsCheckboxes');
+      container.innerHTML = '';
+
+      Object.entries(this.metrics).forEach(([metricId, metricName]) => {
+        const label = document.createElement('label');
+        label.style.display = 'flex';
+        label.style.alignItems = 'center';
+        label.style.gap = '5px';
+        label.style.cursor = 'pointer';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = metricId;
+        checkbox.dataset.metricName = metricName;
+
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(metricName));
+        container.appendChild(label);
+      });
+    },
+
+    async saveCuration() {
+      const athleteId = document.getElementById('profileCoachAthleteSelect').value;
+      if (!athleteId) {
+        alert('Please select an athlete first');
+        return;
+      }
+
+      const selectedMetrics = Array.from(document.querySelectorAll('#metricsCheckboxes input:checked')).map(cb => ({
+        id: cb.value,
+        name: cb.dataset.metricName
+      }));
+
+      const curation = {
+        athlete_id: athleteId,
+        coach_id: this.currentCoach.id,
+        curated_metrics: JSON.stringify(selectedMetrics),
+        growth_story: document.getElementById('curatedGrowthStory').value || null,
+        training_timeline: document.getElementById('curatedTimeline').value || null
+      };
+
+      try {
+        const response = await fetch(`${this.supabaseUrl}/rest/v1/profile_exports?athlete_id=eq.${athleteId}`, {
+          method: 'GET',
+          headers: {
+            'apikey': this.supabaseKey,
+            'Authorization': `Bearer ${this.supabaseKey}`
+          }
+        });
+
+        const existing = await response.json();
+
+        if (existing.length > 0) {
+          await fetch(`${this.supabaseUrl}/rest/v1/profile_exports?id=eq.${existing[0].id}`, {
+            method: 'PATCH',
+            headers: {
+              'apikey': this.supabaseKey,
+              'Authorization': `Bearer ${this.supabaseKey}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(curation)
+          });
+        } else {
+          await fetch(`${this.supabaseUrl}/rest/v1/profile_exports`, {
+            method: 'POST',
+            headers: {
+              'apikey': this.supabaseKey,
+              'Authorization': `Bearer ${this.supabaseKey}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(curation)
+          });
+        }
+
+        const msg = document.getElementById('curatorMsg');
+        msg.textContent = '✓ Curation saved! Ready to export.';
+        msg.style.color = 'green';
+        msg.style.backgroundColor = '#e8f5e9';
+        msg.style.padding = '10px';
+        msg.style.borderRadius = '4px';
+      } catch (e) {
+        const msg = document.getElementById('curatorMsg');
+        msg.textContent = `Error: ${e.message}`;
+        msg.style.color = 'red';
+      }
+    },
+
+    async exportProfilePDF() {
+      const athleteId = document.getElementById('profileCoachAthleteSelect').value;
+      if (!athleteId) {
+        alert('Please select an athlete');
+        return;
+      }
+
+      try {
+        const athlete = this.athletes.find(a => a.id === athleteId);
+        const profileRes = await fetch(`${this.supabaseUrl}/rest/v1/athlete_profiles?athlete_id=eq.${athleteId}`, {
+          headers: {
+            'apikey': this.supabaseKey,
+            'Authorization': `Bearer ${this.supabaseKey}`
+          }
+        });
+        const profileData = await profileRes.json();
+        const profile = profileData[0] || {};
+
+        const exportRes = await fetch(`${this.supabaseUrl}/rest/v1/profile_exports?athlete_id=eq.${athleteId}`, {
+          headers: {
+            'apikey': this.supabaseKey,
+            'Authorization': `Bearer ${this.supabaseKey}`
+          }
+        });
+        const exportData = await exportRes.json();
+        const exportInfo = exportData[0] || {};
+
+        const html = `
+          <html>
+            <head>
+              <style>
+                body { font-family: Arial, sans-serif; margin: 40px; color: #333; }
+                h1 { color: #F54A05; margin-bottom: 5px; }
+                .subtitle { color: #666; margin-bottom: 30px; }
+                .section { margin: 30px 0; page-break-inside: avoid; }
+                .metric { background: #f9f9f9; padding: 10px; margin: 10px 0; border-left: 3px solid #F54A05; }
+                table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+                th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+                th { background: #f0f0f0; }
+              </style>
+            </head>
+            <body>
+              <h1>${athlete.name}</h1>
+              <p class="subtitle">${athlete.program || 'Athlete'} | PEAK Training and Performance</p>
+              
+              <div class="section">
+                <h2>Profile</h2>
+                <p><strong>Sport(s):</strong> ${profile.sports_played || 'N/A'}</p>
+                <p><strong>Training Schedule:</strong> ${profile.solo_workouts_per_week || 0} solo + ${profile.team_workouts_per_week || 0} team workouts/week</p>
+                <p><strong>Sleep Pattern:</strong> ${profile.avg_sleep_hours || 'N/A'} hours/night</p>
+                <p><strong>Nutrition:</strong> ${profile.diet_pattern || 'N/A'}</p>
+              </div>
+
+              <div class="section">
+                <h2>Performance Highlights</h2>
+                ${exportInfo.growth_story ? `<p>${exportInfo.growth_story}</p>` : '<p>No growth story added.</p>'}
+                <p><strong>Training Timeline:</strong> ${exportInfo.training_timeline || 'N/A'}</p>
+              </div>
+
+              <div class="section">
+                <p style="color: #999; font-size: 12px;">Generated by PEAK Performance Lab | ${new Date().toLocaleDateString()}</p>
+              </div>
+            </body>
+          </html>
+        `;
+
+        const printWindow = window.open('', '', 'width=800,height=600');
+        printWindow.document.write(html);
+        printWindow.document.close();
+        printWindow.print();
+      } catch (e) {
+        alert(`Error exporting: ${e.message}`);
+      }
+    }
     };
 
     if (document.readyState === 'loading') {
