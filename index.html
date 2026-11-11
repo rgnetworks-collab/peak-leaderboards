@@ -702,43 +702,7 @@
   } catch (e) {
     err.textContent = 'Network error: ' + e.message;
   }
-}
-          
-          if (!res.ok) {
-            err.textContent = 'Database error: ' + res.status;
-            return;
-          }
-          
-          const allCoaches = await res.json();
-          console.log('All coaches from DB:', allCoaches);
-          
-          // Find coach case-insensitively
-          const coach = allCoaches.find(c => c.name && c.name.toLowerCase() === name.toLowerCase());
-          
-          if (!coach) {
-            err.textContent = 'Coach "' + name + '" not found. Available: ' + allCoaches.map(c => c.name).join(', ');
-            return;
-          }
-          
-          console.log('Found coach:', coach);
-          console.log('Checking password:', pass, '===', coach.password, '?', pass === coach.password);
-          
-          if (coach.password !== pass) {
-            err.textContent = 'Wrong password for ' + name;
-            return;
-          }
-
-          // SUCCESS
-          localStorage.setItem('peakCurrentCoach', name);
-          localStorage.removeItem('peakCurrentAthlete');
-          this.currentCoach = name;
-          this.showApp();
-        } catch (e) {
-          err.textContent = 'Network error: ' + e.message;
-          console.error('Login error:', e);
-        }
-      },
-
+},
       async athleteLogin() {
         const name = document.getElementById('athleteName').value.trim();
         const code = document.getElementById('athleteCode').value.trim();
