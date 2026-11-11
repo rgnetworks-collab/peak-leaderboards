@@ -73,19 +73,15 @@
       <h1>PEAK</h1>
       <p style="text-align: center; color: #666; margin-bottom: 30px;">Leaderboards</p>
       
-      <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-        <button id="coachTabBtn" onclick="app.showCoachLogin()" style="flex: 1; background: #ccc; color: #333;">Coach</button>
-        <button id="athleteTabBtn" onclick="app.showAthleteLogin()" style="flex: 1; background: #ccc; color: #333;">Athlete</button>
-      </div>
       
       <div id="coachLoginForm">
         <div class="form-group">
           <label>Coach Name</label>
-          <input type="text" id="coachName" placeholder="Your name">
+          <input type="text" id="coachName" placeholder="Your name" onkeydown="if(event.key==='Enter') app.login()">
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input type="password" id="password" placeholder="Password">
+          <input type="password" id="password" placeholder="Password" onkeydown="if(event.key==='Enter') app.login()">
         </div>
         <button onclick="app.login()" style="width: 100%;">Sign In</button>
         <div id="loginError" class="error" style="text-align: center; margin-top: 10px;"></div>
@@ -659,15 +655,11 @@
       showCoachLogin() {
         document.getElementById('coachLoginForm').classList.remove('hidden');
         document.getElementById('athleteLoginForm').classList.add('hidden');
-        document.getElementById('coachTabBtn').classList.add('active');
-        document.getElementById('athleteTabBtn').classList.remove('active');
       },
 
       showAthleteLogin() {
         document.getElementById('coachLoginForm').classList.add('hidden');
         document.getElementById('athleteLoginForm').classList.remove('hidden');
-        document.getElementById('athleteTabBtn').classList.add('active');
-        document.getElementById('coachTabBtn').classList.remove('active');
       },
 
      async login() {
