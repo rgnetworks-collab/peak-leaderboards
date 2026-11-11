@@ -670,23 +670,39 @@
         document.getElementById('coachTabBtn').classList.remove('active');
       },
 
-      async login() {
-        const name = document.getElementById('coachName').value.trim();
-        const pass = document.getElementById('password').value;
-        const err = document.getElementById('loginError');
+     async login() {
+  const name = document.getElementById('coachName').value.trim();
+  const pass = document.getElementById('password').value;
+  const err = document.getElementById('loginError');
 
-        if (!name || !pass) { err.textContent = 'Fill all fields'; return; }
+  if (!name || !pass) { err.textContent = 'Fill all fields'; return; }
 
-        try {
-          // Fetch with NO query parameters - just get raw table
-          const res = await fetch(`${SUPABASE_URL}/rest/v1/coaches`, {
-            method: 'GET',
-            headers: { 
-              'Authorization': `Bearer ${SUPABASE_KEY}`, 
-              'apikey': SUPABASE_KEY,
-              'Content-Type': 'application/json'
-            }
-          });
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/verify_coach`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ p_name: name, p_password: pass })
+    });
+
+    const rows = await res.json();
+    if (!Array.isArray(rows) || rows.length === 0) {
+      err.textContent = 'Wrong name or password';
+      return;
+    }
+
+    localStorage.setItem('peakCurrentCoach', rows[0].name);
+    localStorage.removeItem('peakCurrentAthlete');
+    this.currentCoach = rows[0].name;
+    this.loginType = 'coach';
+    this.showApp();
+  } catch (e) {
+    err.textContent = 'Network error: ' + e.message;
+  }
+}
           
           if (!res.ok) {
             err.textContent = 'Database error: ' + res.status;
