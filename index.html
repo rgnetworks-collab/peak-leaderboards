@@ -590,7 +590,7 @@
       <div class="modal-body">
         <div class="form-group">
           <label>Name</label>
-          <input type="text" id="editCoachName" placeholder="Coach name">
+          <input type="text" id="editCoachName" placeholder="Coach name" readonly>
         </div>
         <div class="form-group">
           <label>Password</label>
@@ -1239,7 +1239,7 @@
                 <td>${c.name}</td>
                 <td>
                   <button onclick="app.openEditCoachModal('${c.id}', '${c.name.replace(/'/g, "\\'")}')" style="width: auto; padding: 6px 12px; font-size: 12px;">Edit</button>
-                  <button onclick="app.deleteCoach('${c.id}')" class="danger" style="width: auto; padding: 6px 12px; font-size: 12px; margin-left: 5px;">Delete</button>
+                  <button onclick="app.deleteCoach('${c.name.replace(/'/g, "\\'")}')" class="danger" style="width: auto; padding: 6px 12px; font-size: 12px; margin-left: 5px;">Delete</button>
                 </td>
               </tr>
             `).join('');
@@ -1291,6 +1291,21 @@
         }
       },
 
+      async rpc(fn, body) {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok) throw new Error((data && data.message) || `Request failed (${res.status})`);
+        return data;
+      },
+
       async addCoach() {
         const name = document.getElementById('newCoachName').value.trim();
         const pass = document.getElementById('newCoachPassword').value;
@@ -1299,35 +1314,38 @@
         if (!name) { msg.innerHTML = '<span class="error">Enter coach name</span>'; return; }
         if (pass.length < 6) { msg.innerHTML = '<span class="error">Password must be at least 6 characters</span>'; return; }
 
-        try {
-          const res = await fetch(`${SUPABASE_URL}/rest/v1/coaches`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-            body: JSON.stringify({ name, password: pass })
-          });
+        const actorPass = prompt('Enter YOUR password to confirm:');
+        if (!actorPass) return;
 
-          if (res.ok) {
-            document.getElementById('newCoachName').value = '';
-            document.getElementById('newCoachPassword').value = '';
-            msg.innerHTML = '<span class="success">Coach added successfully!</span>';
-            this.renderCoaches();
-          } else {
-            msg.innerHTML = '<span class="error">Coach already exists</span>';
-          }
+        try {
+          await this.rpc('add_coach', {
+            p_actor_name: this.currentCoach,
+            p_actor_password: actorPass,
+            p_name: name,
+            p_password: pass
+          });
+          document.getElementById('newCoachName').value = '';
+          document.getElementById('newCoachPassword').value = '';
+          msg.innerHTML = '<span class="success">Coach added successfully!</span>';
+          this.renderCoaches();
         } catch (e) {
-          msg.innerHTML = '<span class="error">Error: ' + e.message + '</span>';
+          msg.textContent = e.message;
+          msg.className = 'error';
         }
       },
 
-      async deleteCoach(id) {
-        if (!confirm('Delete this coach?')) return;
+      async deleteCoach(name) {
+        if (!confirm(`Delete coach "${name}"?`)) return;
+
+        const actorPass = prompt('Enter YOUR password to confirm:');
+        if (!actorPass) return;
 
         try {
-          await fetch(`${SUPABASE_URL}/rest/v1/coaches?id=eq.${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY }
+          await this.rpc('delete_coach', {
+            p_actor_name: this.currentCoach,
+            p_actor_password: actorPass,
+            p_target_name: name
           });
-
           this.renderCoaches();
         } catch (e) {
           alert('Error: ' + e.message);
@@ -1396,7 +1414,7 @@
       },
 
       openEditCoachModal(id, name) {
-        this.editingCoachId = id;
+        this.editingCoachName = name;
         document.getElementById('editCoachName').value = name;
         document.getElementById('editCoachPassword').value = '';
         document.getElementById('editCoachModal').classList.add('active');
@@ -1407,28 +1425,19 @@
       },
 
       async saveEditCoach() {
-        const name = document.getElementById('editCoachName').value.trim();
-        const password = document.getElementById('editCoachPassword').value.trim();
+        const password = document.getElementById('editCoachPassword').value;
+        if (!password) { this.closeEditCoachModal(); return; }
 
-        if (!name) {
-          alert('Enter coach name');
-          return;
-        }
+        const actorPass = prompt('Enter YOUR password to confirm:');
+        if (!actorPass) return;
 
         try {
-          const body = { name };
-          if (password) body.password = password;
-
-          await fetch(`${SUPABASE_URL}/rest/v1/coaches?id=eq.${this.editingCoachId}`, {
-            method: 'PATCH',
-            headers: {
-              'Authorization': `Bearer ${SUPABASE_KEY}`,
-              'apikey': SUPABASE_KEY,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(body)
+          await this.rpc('update_coach_password', {
+            p_actor_name: this.currentCoach,
+            p_actor_password: actorPass,
+            p_target_name: this.editingCoachName,
+            p_new_password: password
           });
-
           this.closeEditCoachModal();
           this.renderCoaches();
         } catch (e) {
